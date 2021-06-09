@@ -184,7 +184,7 @@ void lower_impl(const vector<Function> &output_funcs,
     log("Lowering after removing extern loops:", s);
 
     debug(1) << "Performing sliding window optimization...\n";
-    s = sliding_window(s, env);
+    // s = sliding_window(s, env);
     log("Lowering after sliding window:", s);
 
     // This uniquifies the variable names, so we're good to simplify

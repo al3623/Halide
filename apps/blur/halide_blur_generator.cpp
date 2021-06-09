@@ -1,5 +1,35 @@
 #include "Halide.h"
+// Include some support code for loading pngs.
+#include "halide_image_io.h"
+#include "halide_benchmark.h"
+using namespace Halide::Tools;
+using namespace Halide;
+int main(void) {
+    Buffer<uint16_t> input = load_and_convert_image("/Users/alexanderroot/Projects/Halide-fresh/tutorial/images/gray.png");
+    Func blur_x("blur_x");
+	Func blur_y("blur_y");
+    Var x("x"), y("y"), xi("xi"), yi("yi"), xo("xo"), yo("yo");
+	// The algorithm
+	blur_x(x, y) = (input(x, y) + input(x + 1, y) + input(x + 2, y)) / 3;
+	blur_y(x, y) = (blur_x(x, y) + blur_x(x, y + 1) + blur_x(x, y + 2)) / 3;
+	blur_x.split(x, xo, xi, 4)
+	      .vectorize(xi, 4)
+	      .store_at(blur_y, xo)
+	      .compute_at(blur_y, yi);
+	blur_y.tile(x, y, xo, yo, xi, yi, 4, 4)
+	      .parallel(yo)
+	      .vectorize(xi, 4);
+	blur_y.compile_jit();
+	double min_time = Tools::benchmark([&]() {
+	              blur_y.realize({input.width() - 3, input.height() - 3}); });
+		          printf("\tBenchmarked runtime (JIT): %gms\n", min_time * 1e3);
+    Buffer<uint16_t> output = blur_y.realize({input.width() - 3, input.height() - 3});
+    convert_and_save_image(output, "/Users/alexanderroot/Projects/Halide-fresh/tutorial/images/blurred_gray.png");
+    return 1;
+}
 
+
+/*
 namespace {
 
 enum class BlurGPUSchedule {
@@ -115,3 +145,5 @@ public:
 }  // namespace
 
 HALIDE_REGISTER_GENERATOR(HalideBlur, halide_blur)
+	*/
+
