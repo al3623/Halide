@@ -54,10 +54,22 @@ int main(int argc, char **argv) {
 
     for (int y = 0; y < N; y++) {
         for (int x = 0; x < M; x++) {
-			input(x,y) = (uint8_t) rand();
+			input(x,y) = // (uint8_t) rand();
+			(uint8_t) (x+y);
         }
     }
 
+ 	for (int y = 0; y < N; y++) {
+		for (int x = 0; x < M; x++) {
+			int i = y * M + x;
+			uint8_t atlin = v[i];
+			uint8_t halidein = input(x,y);
+			if (atlin != halidein) {
+				printf("(%d,%d): %d!=%d\n",x,y,atlin,halidein);
+			}
+       }
+   }
+ 
 	error = 0;
 	double t = Halide::Tools::benchmark(trials,1,[&]() { 
     	error = immediate(input, output1);
@@ -101,10 +113,10 @@ int main(int argc, char **argv) {
 			uint8_t out2 = output2(x,y);
 			uint8_t out3 = output3(x,y);
 			if (out1 != out2) {
-				printf("Ohno:(\n");
+				printf("Ohno im two :(\n");
 			}
 			if (out3 != out2) {
-				printf("Ohno:(\n");
+				printf("Ohno tile two :(\n");
 			}
         }
    }
@@ -135,10 +147,10 @@ int main(int argc, char **argv) {
 			uint8_t out2 = res2[i];
 			uint8_t out3 = res3[i];
 			if (out1 != out2) {
-				printf("Ohno:(\n");
+				printf("Ohno atl :(\n");
 			}
 			if (out3 != out2) {
-				printf("Ohno:(\n");
+				printf("Ohno atl :(\n");
 			}
         }
    }

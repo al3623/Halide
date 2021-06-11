@@ -42,10 +42,10 @@ int main(int argc, char **argv) {
 	Func blur_y("blur_y");
     Var x("x"), y("y"), xi("xi"), yi("yi"), xo("xo"), yo("yo");
 	// The algorithm
-	Expr clamped_x = clamp(x,1,input.width()-1);
-	Expr clamped_y = clamp(y,1,input.height()-1);
-	Expr guard_x = select(0 < x && x < input.width()-1,clamped_x,0);
-	Expr guard_y = select(0 < y && y < input.height()-1,clamped_y,0);
+	Expr clamped_x = clamp(x,0,input.width()-1);
+	Expr clamped_y = clamp(y,0,input.height()-1);
+	Expr guard_x = select(0 <= x && x < input.width(),clamped_x,0);
+	Expr guard_y = select(0 <= y && y < input.height(),clamped_y,0);
 	Func guarded("guarded");
 	guarded(x,y) = input(guard_x, guard_y);
 
