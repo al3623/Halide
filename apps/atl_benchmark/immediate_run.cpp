@@ -14,6 +14,7 @@
 // code, so we explicitly include it. It's a header-only class, and
 // doesn't require libHalide.
 #include "HalideBuffer.h"
+#include "halide_benchmark.h"
 
 #include <stdio.h>
 
@@ -40,23 +41,27 @@ int main(int argc, char **argv) {
     // zero on success.
 
     // Let's make a buffer for our input and output.
-    Halide::Runtime::Buffer<uint8_t> input(640, 480), output(640, 480);
-    for (int y = 0; y < 480; y++) {
-        for (int x = 0; x < 640; x++) {
+    Halide::Runtime::Buffer<uint8_t> input(1280, 768), output(1280, 768);
+    for (int y = 0; y < 768; y++) {
+        for (int x = 0; x < 1280; x++) {
 			input(x,y) = (uint8_t) rand();
            }
         }
 
-    int error = immediate(input, output);
+	int error = 0;
+	double t = Halide::Tools::benchmark([&]() { 
+    	error = immediate(input, output);
+		});
 
     if (error) {
         printf("Halide returned an error: %d\n", error);
         return -1;
-    }
+    } else {
+		printf("%gs\n", t);
+	}
 
     // Now let's check the filter performed as advertised. It was
     // supposed to add the offset to every input pixel.
     // Everything worked!
-    printf("Success!\n");
     return 0;
 }
