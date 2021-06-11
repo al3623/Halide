@@ -27,8 +27,10 @@
 #include <stdio.h>
 
 int main(int argc, char **argv) {
-	int M = 2000;
-	int N = 2000;
+	int M = 100;
+	int N = 100;
+	int error = 0;
+	int trials = 20;
     // The ImageParam inputs have become pointers to "halide_buffer_t"
     // structs. This is struct that Halide uses to represent arrays of
     // data.  Unless you're calling the Halide pipeline from pure C
@@ -53,11 +55,11 @@ int main(int argc, char **argv) {
     for (int y = 0; y < N; y++) {
         for (int x = 0; x < M; x++) {
 			input(x,y) = (uint8_t) rand();
-           }
         }
+    }
 
-	int error = 0;
-	double t = Halide::Tools::benchmark(10,1,[&]() { 
+	error = 0;
+	double t = Halide::Tools::benchmark(trials,1,[&]() { 
     	error = immediate(input, output1);
 		});
 
@@ -65,11 +67,11 @@ int main(int argc, char **argv) {
         printf("Halide returned an error: %d\n", error);
         return -1;
     } else {
-		printf("immediate\t%gs\n", t);
+		printf("immediate\t%d\t%d\t%gs\n",N,M,t);
 	}
 
 	error = 0;
-	t = Halide::Tools::benchmark(10,1,[&]() { 
+	t = Halide::Tools::benchmark(trials,1,[&]() { 
     	error = two_stage(input, output2);
 		});
 	
@@ -77,11 +79,11 @@ int main(int argc, char **argv) {
         printf("Halide returned an error: %d\n", error);
         return -1;
     } else {
-		printf("two_stage\t%gs\n", t);
+		printf("two_stage\t%d\t%d\t%gs\n", N,M,t);
 	}
 
 	error = 0;
-	t = Halide::Tools::benchmark(10,1,[&]() { 
+	t = Halide::Tools::benchmark(trials,1,[&]() { 
     	error = tiled(input, output3);
 		});
 	
@@ -89,31 +91,61 @@ int main(int argc, char **argv) {
         printf("Halide returned an error: %d\n", error);
         return -1;
     } else {
-		printf("tiled_4 \t%gs\n", t);
+		printf("tiled_4 \t%d\t%d\t%gs\n", N,M,t);
 	}
+
+   // Halide is equivalent
+   for (int y = 0; y < N; y++) {
+        for (int x = 0; x < M; x++) {
+			uint8_t out1 = output1(x,y);
+			uint8_t out2 = output2(x,y);
+			uint8_t out3 = output3(x,y);
+			if (out1 != out2) {
+				printf("Ohno:(\n");
+			}
+			if (out3 != out2) {
+				printf("Ohno:(\n");
+			}
+        }
+   }
 
    // ATL benchmarks
    u_int8_t *res1 = (u_int8_t *) calloc(1,N*M* sizeof (u_int8_t));
-   t = Halide::Tools::benchmark(10,1,[&]() { 
+   t = Halide::Tools::benchmark(trials,1,[&]() { 
     	blurim(v,M,N,res1);
 		});
-   free(res1);
-   printf("blurim atl \t%gs\n",t);
+   printf("blurim atl \t%d\t%d\t%gs\n",N,M,t);
 
    u_int8_t *res2 = (u_int8_t *) calloc(1,N*M* sizeof (u_int8_t));
-   t = Halide::Tools::benchmark(10,1,[&]() { 
+   t = Halide::Tools::benchmark(trials,1,[&]() { 
     	blurtwo(v,M,N,res2);
 		});
-   free(res2);
-   printf("two stage atl \t%gs\n",t);
+   printf("two stage atl \t%d\t%d\t%gs\n",N,M,t);
 
    u_int8_t *res3 = (u_int8_t *) calloc(1,N*M* sizeof (u_int8_t));
-   t = Halide::Tools::benchmark(10,1,[&]() { 
+   t = Halide::Tools::benchmark(trials,1,[&]() { 
     	blurtiles(v,M,N,res3);
 		});
-   free(res3);
-   printf("tiled 4 atl \t%gs\n",t);
+   printf("tiled 4 atl \t%d\t%d\t%gs\n",N,M,t);
 
+   for (int y = 0; y < N; y++) {
+        for (int x = 0; x < M; x++) {
+			int i = y * M + x;
+			uint8_t out1 = res1[i];
+			uint8_t out2 = res2[i];
+			uint8_t out3 = res3[i];
+			if (out1 != out2) {
+				printf("Ohno:(\n");
+			}
+			if (out3 != out2) {
+				printf("Ohno:(\n");
+			}
+        }
+   }
+ 
+   free(res1);
+   free(res2);
+   free(res3);
 
    return 0;
 }
