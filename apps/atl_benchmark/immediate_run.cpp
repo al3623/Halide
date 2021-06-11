@@ -27,8 +27,8 @@
 #include <stdio.h>
 
 int main(int argc, char **argv) {
-	int M = 100;
-	int N = 100;
+	int M = 4;
+	int N = 4;
 	int error = 0;
 	int trials = 20;
     // The ImageParam inputs have become pointers to "halide_buffer_t"
@@ -141,6 +141,17 @@ int main(int argc, char **argv) {
 				printf("Ohno:(\n");
 			}
         }
+   }
+ 
+   for (int y = 0; y < N; y++) {
+		for (int x = 0; x < M; x++) {
+			int i = y * M + x;
+			uint8_t atlout = res1[i];
+			uint8_t halideout = output1(x,y);
+			if (atlout != halideout) {
+				printf("(%d,%d): %d!=%d\n",x,y,atlout,halideout);
+			}
+       }
    }
  
    free(res1);
