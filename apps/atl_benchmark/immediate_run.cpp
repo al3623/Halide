@@ -9,6 +9,7 @@
 // Instead, it depends on the header file that lesson_10_generate
 // produced when we ran it:
 #include "blur_immediate.h"
+#include "blur_two_stage.h"
 
 // We want to continue to use our Halide::Buffer with AOT-compiled
 // code, so we explicitly include it. It's a header-only class, and
@@ -19,11 +20,6 @@
 #include <stdio.h>
 
 int main(int argc, char **argv) {
-    // Have a look in the header file above (it won't exist until you've run
-    // lesson_10_generate). At the bottom is the signature of the function we generated:
-
-    // int brighter(halide_buffer_t *_input_buffer, uint8_t _offset, halide_buffer_t *_brighter_buffer);
-
     // The ImageParam inputs have become pointers to "halide_buffer_t"
     // structs. This is struct that Halide uses to represent arrays of
     // data.  Unless you're calling the Halide pipeline from pure C
@@ -37,11 +33,10 @@ int main(int argc, char **argv) {
     // fact just a shared pointer to the simpler
     // Halide::Runtime::Buffer class. They share the same API.
 
-    // Finally, the return value of "brighter" is an error code. It's
-    // zero on success.
+	Halide::Runtime::Buffer<uint8_t> input(1280, 768)
+			, output1(1280, 768)
+			, output2(1280, 768);
 
-    // Let's make a buffer for our input and output.
-    Halide::Runtime::Buffer<uint8_t> input(1280, 768), output(1280, 768);
     for (int y = 0; y < 768; y++) {
         for (int x = 0; x < 1280; x++) {
 			input(x,y) = (uint8_t) rand();
@@ -50,15 +45,29 @@ int main(int argc, char **argv) {
 
 	int error = 0;
 	double t = Halide::Tools::benchmark([&]() { 
-    	error = immediate(input, output);
+    	error = immediate(input, output1);
 		});
 
     if (error) {
         printf("Halide returned an error: %d\n", error);
         return -1;
     } else {
-		printf("%gs\n", t);
+		printf("immediate\t%gs\n", t);
 	}
+
+	error = 0;
+	t = Halide::Tools::benchmark([&]() { 
+    	error = two_stage(input, output2);
+		});
+	
+   if (error) {
+        printf("Halide returned an error: %d\n", error);
+        return -1;
+    } else {
+		printf("two_stage\t%gs\n", t);
+	}
+
+
 
     // Now let's check the filter performed as advertised. It was
     // supposed to add the offset to every input pixel.
