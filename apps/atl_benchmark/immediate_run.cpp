@@ -1,4 +1,4 @@
-// Halide tutorial lesson 10: AOT compilation part 2
+// Halide tutorial lesson 11: AOT compilation part 2
 
 // Before reading this file, see lesson_10_aot_compilation_generate.cpp
 
@@ -48,7 +48,7 @@ int main(int argc, char **argv) {
 			, output3(M, N);
 
 	halide_buffer_t ptr = input.get_buf();
-	uint8_t *data = ptr.host;
+	uint8_t *v = ptr.host;
 
     for (int y = 0; y < N; y++) {
         for (int x = 0; x < M; x++) {
@@ -91,6 +91,25 @@ int main(int argc, char **argv) {
     } else {
 		printf("tiled_4 \t%gs\n", t);
 	}
+
+   u_int8_t *res1 = NULL;
+   t = Halide::Tools::benchmark(10,1,[&]() { 
+    	res1 = blurim(v,M,N);
+		});
+   printf("blurim atl \t%gs\n",t);
+
+   u_int8_t *res2 = NULL;
+   t = Halide::Tools::benchmark(10,1,[&]() { 
+    	res2 = blurtwo(v,M,N);
+		});
+   printf("two stage atl \t%gs\n",t);
+
+   u_int8_t *res3 = NULL;
+   t = Halide::Tools::benchmark(10,1,[&]() { 
+    	res2 = blurtiles(v,M,N);
+		});
+   printf("tiled 4 atl \t%gs\n",t);
+
 
    return 0;
 }
