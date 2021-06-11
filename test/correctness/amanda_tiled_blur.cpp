@@ -31,8 +31,8 @@ int main(void) {
 	Func guarded("guarded");
 	guarded(x,y) = input(guard_x, guard_y);
 
-	blur_x(x, y) = (guarded(x-1, y) + guarded(x, y) + guarded(x + 1, y)) / 3;
-	blur_y(x, y) = (blur_x(x, y-1) + blur_x(x, y) + blur_x(x, y + 1)) / 3;
+	blur_x(x, y) = (guarded(x-1, y) + guarded(x, y) + guarded(x + 1, y));
+	blur_y(x, y) = (blur_x(x, y-1) + blur_x(x, y) + blur_x(x, y + 1));
     
 	blur_y.tile(x, y, xo, yo, xi, yi, 4, 4);
     blur_x.compute_at(blur_y, xo);
@@ -40,7 +40,7 @@ int main(void) {
 	double min_time = Tools::benchmark([&]() {
 	              blur_y.realize({input.width(), input.height()}); });
 				  printf("\t%d * %d\n",input.height(),input.width());
-		          printf("\tBenchmarked runtime (JIT): %gms\n", min_time * 1e3);
+		          printf("\tBenchmarked runtime (JIT): %gs\n", min_time);
     // Buffer<uint16_t> output = blur_y.realize({input.width(), input.height()});
 
 	blur_y.compile_to_c("tiled.c", blur_y.infer_arguments());

@@ -19,18 +19,19 @@ int main(void) {
 	Func guarded("guarded");
 	guarded(x,y) = input(guard_x, guard_y);
 
-	blur_x(x, y) = (guarded(x-1, y) + guarded(x, y) + guarded(x + 1, y)) / 3;
-	blur_y(x, y) = (blur_x(x, y-1) + blur_x(x, y) + blur_x(x, y + 1)) / 3;
+	blur_x(x, y) = (guarded(x-1, y) + guarded(x, y) + guarded(x + 1, y));
+	blur_y(x, y) = (blur_x(x, y-1) + blur_x(x, y) + blur_x(x, y + 1));
 	blur_y.compile_jit();
 	double min_time = Tools::benchmark([&]() {
 	              blur_y.realize({input.width(), input.height()}); });
 				  printf("\t%d * %d\n",input.height(),input.width());
-		          printf("\tBenchmarked runtime (JIT): %gms\n", 
-								  min_time * 1e3);
+		          printf("\tBenchmarked runtime (JIT): %gs\n", 
+								  min_time);
    // Buffer<uint16_t> output = blur_y.realize({input.width(), input.height()});
 
     // blur_y.print_loop_nest();
 	blur_y.compile_to_c("immediate.c", blur_y.infer_arguments());
+	blur_y.compile_to_header("immediate.h", blur_y.infer_arguments());
     //convert_and_save_image(output, "/home/amangoliu/Halide/tutorial/images/blurred_gray.png");
     return 0;
 }

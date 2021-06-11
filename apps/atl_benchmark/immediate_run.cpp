@@ -10,16 +10,25 @@
 // produced when we ran it:
 #include "blur_immediate.h"
 #include "blur_two_stage.h"
+#include "blur_tiled.h"
+
+#include "blurim.h"
+#include "blurtwo.h"
+#include "blurtiles.h"
 
 // We want to continue to use our Halide::Buffer with AOT-compiled
 // code, so we explicitly include it. It's a header-only class, and
 // doesn't require libHalide.
 #include "HalideBuffer.h"
+#include "IntrusivePtr.h"
 #include "halide_benchmark.h"
+#include "runtime/HalideBuffer.h"
 
 #include <stdio.h>
 
 int main(int argc, char **argv) {
+	int M = 2000;
+	int N = 2000;
     // The ImageParam inputs have become pointers to "halide_buffer_t"
     // structs. This is struct that Halide uses to represent arrays of
     // data.  Unless you're calling the Halide pipeline from pure C
@@ -33,18 +42,22 @@ int main(int argc, char **argv) {
     // fact just a shared pointer to the simpler
     // Halide::Runtime::Buffer class. They share the same API.
 
-	Halide::Runtime::Buffer<uint8_t> input(1280, 768)
-			, output1(1280, 768)
-			, output2(1280, 768);
+	Halide::Runtime::Buffer<uint8_t> input(M, N)
+			, output1(M, N)
+			, output2(M, N)
+			, output3(M, N);
 
-    for (int y = 0; y < 768; y++) {
-        for (int x = 0; x < 1280; x++) {
+	halide_buffer_t ptr = input.get_buf();
+	uint8_t *data = ptr.host;
+
+    for (int y = 0; y < N; y++) {
+        for (int x = 0; x < M; x++) {
 			input(x,y) = (uint8_t) rand();
            }
         }
 
 	int error = 0;
-	double t = Halide::Tools::benchmark([&]() { 
+	double t = Halide::Tools::benchmark(10,1,[&]() { 
     	error = immediate(input, output1);
 		});
 
@@ -56,7 +69,7 @@ int main(int argc, char **argv) {
 	}
 
 	error = 0;
-	t = Halide::Tools::benchmark([&]() { 
+	t = Halide::Tools::benchmark(10,1,[&]() { 
     	error = two_stage(input, output2);
 		});
 	
@@ -67,10 +80,17 @@ int main(int argc, char **argv) {
 		printf("two_stage\t%gs\n", t);
 	}
 
+	error = 0;
+	t = Halide::Tools::benchmark(10,1,[&]() { 
+    	error = tiled(input, output3);
+		});
+	
+   if (error) {
+        printf("Halide returned an error: %d\n", error);
+        return -1;
+    } else {
+		printf("tiled_4 \t%gs\n", t);
+	}
 
-
-    // Now let's check the filter performed as advertised. It was
-    // supposed to add the offset to every input pixel.
-    // Everything worked!
-    return 0;
+   return 0;
 }

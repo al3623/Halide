@@ -167,6 +167,10 @@ class Buffer {
 
 public:
     /** True if the Halide type is not void (or const void). */
+	halide_buffer_t get_buf() {
+		return buf;
+	}
+
     static constexpr bool has_static_halide_type = !T_is_void;
 
     /** Get the Halide type of T. Callers should not use the result if
