@@ -37,26 +37,21 @@ using namespace Halide;
 
 int main(int argc, char **argv) {
 
-	ImageParam input(type_of<uint8_t>(), 2);
+	ImageParam image(type_of<uint8_t>(), 2);
+
     Func blur_x("blur_x");
 	Func blur_y("blur_y");
-    Var x("x"), y("y"), xi("xi"), yi("yi"), xo("xo"), yo("yo");
-	// The algorithm
-	Expr clamped_x = clamp(x,0,input.width()-1);
-	Expr clamped_y = clamp(y,0,input.height()-1);
-	Expr guard_x = select(0 <= x && x < input.width(),clamped_x,0);
-	Expr guard_y = select(0 <= y && y < input.height(),clamped_y,0);
-	Func guarded("guarded");
-	guarded(x,y) = input(guard_x, guard_y);
+    Var x("x"), y("y");
 
-	blur_x(x, y) = (guarded(x-1, y) + guarded(x, y) + guarded(x + 1, y));
+	Func input = BoundaryConditions::constant_exterior(image,0);
+
+	blur_x(x, y) = (input(x-1, y) + input(x, y) + input(x +1, y));
+
 	blur_y(x, y) = (blur_x(x, y-1) + blur_x(x, y) + blur_x(x, y + 1));
 	
-    blur_y.compile_to_static_library("blur_immediate", {input}, "immediate");
+    blur_y.compile_to_static_library("blur_immediate", {image}, "immediate");
 
     printf("Halide pipeline compiled, but not yet run.\n");
-
-    // To continue this lesson, look in the file lesson_10_aot_compilation_run.cpp
 
     return 0;
 }
