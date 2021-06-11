@@ -92,22 +92,26 @@ int main(int argc, char **argv) {
 		printf("tiled_4 \t%gs\n", t);
 	}
 
-   u_int8_t *res1 = NULL;
+   // ATL benchmarks
+   u_int8_t *res1 = (u_int8_t *) calloc(1,N*M* sizeof (u_int8_t));
    t = Halide::Tools::benchmark(10,1,[&]() { 
-    	res1 = blurim(v,M,N);
+    	blurim(v,M,N,res1);
 		});
+   free(res1);
    printf("blurim atl \t%gs\n",t);
 
-   u_int8_t *res2 = NULL;
+   u_int8_t *res2 = (u_int8_t *) calloc(1,N*M* sizeof (u_int8_t));
    t = Halide::Tools::benchmark(10,1,[&]() { 
-    	res2 = blurtwo(v,M,N);
+    	blurtwo(v,M,N,res2);
 		});
+   free(res2);
    printf("two stage atl \t%gs\n",t);
 
-   u_int8_t *res3 = NULL;
+   u_int8_t *res3 = (u_int8_t *) calloc(1,N*M* sizeof (u_int8_t));
    t = Halide::Tools::benchmark(10,1,[&]() { 
-    	res2 = blurtiles(v,M,N);
+    	blurtiles(v,M,N,res3);
 		});
+   free(res3);
    printf("tiled 4 atl \t%gs\n",t);
 
 
