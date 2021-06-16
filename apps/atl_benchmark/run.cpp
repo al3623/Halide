@@ -27,22 +27,10 @@
 #include <stdio.h>
 
 int main(int argc, char **argv) {
-	int M = 1000;
-	int N = 1000;
+	int M = 5000;
+	int N = 5000;
 	int error = 0;
 	int trials = 30;
-    // The ImageParam inputs have become pointers to "halide_buffer_t"
-    // structs. This is struct that Halide uses to represent arrays of
-    // data.  Unless you're calling the Halide pipeline from pure C
-    // code, you don't want to use it
-    // directly. Halide::Runtime::Buffer is a simple wrapper around
-    // halide_buffer_t that will implicitly convert to a
-    // halide_buffer_t *. We will pass Halide::Runtime::Buffer objects
-    // in those slots.
-
-    // The Halide::Buffer class we have been using in JIT code is in
-    // fact just a shared pointer to the simpler
-    // Halide::Runtime::Buffer class. They share the same API.
 
 	Halide::Runtime::Buffer<uint8_t> input(M, N)
 			, output1(M, N)
@@ -70,7 +58,7 @@ int main(int argc, char **argv) {
     } else {
 		printf("immediate\t%d\t%d\t%gms\n",N,M,t*1000);
 	}
-
+	
 	error = 0;
 	t = Halide::Tools::benchmark(trials,1,[&]() { 
     	error = two_stage(input, output2);
@@ -109,14 +97,14 @@ int main(int argc, char **argv) {
 			}
         }
    }
-
-   // ATL benchmarks
+   
+	// ATL benchmarks
    u_int8_t *res1 = (u_int8_t *) calloc(1,N*M* sizeof (u_int8_t));
    t = Halide::Tools::benchmark(trials,1,[&]() { 
     	blurim(v,M,N,res1);
 		});
    printf("blurim atl \t%d\t%d\t%gms\n",N,M,t*1000);
-
+   
    u_int8_t *res2 = (u_int8_t *) calloc(1,N*M* sizeof (u_int8_t));
    t = Halide::Tools::benchmark(trials,1,[&]() { 
     	blurtwo(v,M,N,res2);
@@ -150,14 +138,18 @@ int main(int argc, char **argv) {
 			uint8_t atlout = res1[i];
 			uint8_t halideout = output1(x,y);
 			if (atlout != halideout) {
-				printf("(%d,%d): %d!=%d\n",x,y,atlout,halideout);
+				// printf("(%d,%d): %d!=%d\n",x,y,atlout,halideout);
+				printf("Neq\n");
+				goto out;
 			}
        }
    }
+
+out:
  
    free(res1);
-   free(res2);
-   free(res3);
+   //free(res2);
+   //free(res3);
 
    return 0;
 }
