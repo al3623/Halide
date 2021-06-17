@@ -60,20 +60,20 @@ int main(int argc, char **argv) {
 					, 0);
 	blur_y(x, y) = guardy(x, y-1) + guardy(x, y) + guardy(x, y + 1);
 	*/
-
+	/*
 	Func clamped("clamped");
 	clamped(x,y) = image(clamp(x,0,image.width()-1),clamp(y,0,image.height()-1));
 
 	blur_x(x, y) = (clamped(x-1, y) + clamped(x, y) + clamped(x +1, y));
 	blur_y(x, y) = blur_x(x, y-1) + blur_x(x, y) + blur_x(x, y + 1);
-
-	/*
+	*/
+	
 	Func input("input");
 	input = BoundaryConditions::constant_exterior(image,0);
 
 	blur_x(x,y) = input(x-1,y) + input(x,y) + input(x+1,y);
 	blur_y(x,y) = blur_x(x,y-1) + blur_x(x,y) + blur_x(x,y+1);
-	*/
+	
     blur_y.compile_to_static_library("blur_immediate", {image}, "immediate");
 
     printf("Halide pipeline compiled, but not yet run.\n");

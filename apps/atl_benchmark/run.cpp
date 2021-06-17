@@ -27,8 +27,8 @@
 #include <stdio.h>
 
 int main(int argc, char **argv) {
-	int M = 5000;
-	int N = 5000;
+	int M = 1000;
+	int N = 1000;
 	int error = 0;
 	int trials = 30;
 
@@ -148,8 +148,8 @@ int main(int argc, char **argv) {
 out:
  
    free(res1);
-   //free(res2);
-   //free(res3);
+   free(res2);
+   free(res3);
 
    return 0;
 }
