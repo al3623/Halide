@@ -57,7 +57,7 @@ void blurpart(u_int8_t* v,int m,int n,u_int8_t*output){
 			u_int8_t tmp21 = 0;
 			tmp21 = v[(((m)) * (H30 + 1)) + H33 + 1];
 			tmp19 = tmp20 + tmp21;
-			output[(m) * ((H30 - (1))) + H33 + (m)] = tmp12 + tmp19;
+			output[((((1 + (m - 1) - (1)) + m - (m - (1))))) * ((H30 - (1))) + H33 + (1) * (m)] = tmp12 + tmp19;
 		}
 		for (int H57 = 1; H57 < (m - 1); H57++) {
 			u_int8_t tmp22 = 0;
@@ -92,7 +92,7 @@ void blurpart(u_int8_t* v,int m,int n,u_int8_t*output){
 			u_int8_t tmp37 = 0;
 			tmp37 = v[(((m)) * (H30 + 1)) + H57 + 1];
 			tmp33 = tmp34 + tmp37;
-			output[(m) * ((H30 - (1))) + (H57 - (1)) +(m) + (1)] = tmp22 + tmp33;
+			output[((((1 + (m - 1) - (1)) + m - (m - (1))))) * ((H30 - (1))) + (H57 - (1)) + (1) * (m) + (1)] = tmp22 + tmp33;
 		}
 		for (int H93 = m - (1); H93 < m; H93++) {
 			u_int8_t tmp38 = 0;
@@ -115,7 +115,7 @@ void blurpart(u_int8_t* v,int m,int n,u_int8_t*output){
 			u_int8_t tmp47 = 0;
 			tmp47 = v[(((m)) * (H30 + 1)) + H93];
 			tmp45 = tmp46 + tmp47;
-			output[(m) * ((H30 - (1))) + (H93 - (m - (1))) + (m) + ((m - (1)))] = tmp38 + tmp45;
+			output[((((1 + (m - 1) - (1)) + m - (m - (1))))) * ((H30 - (1))) + (H93 - (m - (1))) + (1) * (m) + ((1 + (m - 1) - (1)))] = tmp38 + tmp45;
 		}
 	}
 	for (int H117 = n - (1); H117 < n; H117++) {
@@ -148,7 +148,7 @@ void blurpart(u_int8_t* v,int m,int n,u_int8_t*output){
 				tmp57 = v[(((m)) * (H117)) + H118 + 1];
 			}
 			tmp53 = tmp54 + tmp57;
-			output[(m) * ((H117 - (n - (1)))) + H118 + ((n - (1))) * (m)] = tmp48 + tmp53;
+			output[(m) * ((H117 - (n - (1)))) + H118 + ((1 + (n - 1) - (1))) * (m)] = tmp48 + tmp53;
 		}
 	}
 }

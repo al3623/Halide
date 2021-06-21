@@ -16,6 +16,7 @@
 #include "blurim.h"
 #include "blurpart.h"
 #include "blurtwo.h"
+#include "blurtwopart.h"
 #include "blurtiles.h"
 
 // We want to continue to use our Halide::Buffer with AOT-compiled
@@ -138,6 +139,13 @@ int main(int argc, char **argv) {
 		});
    printf("blurpart atl \t%d\t%d\t%gms\n",N,M,t*1000);
 
+   u_int8_t *res5 = (u_int8_t *) calloc(1,N*M* sizeof (u_int8_t));
+   t = Halide::Tools::benchmark(trials,1,[&]() { 
+    	blurtwopart(v,M,N,res5);
+		});
+   printf("blurtwopart atl \t%d\t%d\t%gms\n",N,M,t*1000);
+
+
    for (int y = 0; y < N; y++) {
         for (int x = 0; x < M; x++) {
 			int i = y * M + x;
@@ -145,6 +153,7 @@ int main(int argc, char **argv) {
 			uint8_t out2 = res2[i];
 			uint8_t out3 = res3[i];
 			uint8_t out4 = res4[i];
+			uint8_t out5 = res5[i];
 			if (out1 != out2) {
 				printf("Ohno atl :(\n");
 			}
@@ -154,7 +163,9 @@ int main(int argc, char **argv) {
 			if (out3 != out4) {
 				printf("Ohno atl :(\n");
 			}
- 
+ 			if (out5 != out4) {
+				printf("Ohno atl :(\n");
+			}
         }
    }
  
@@ -176,6 +187,7 @@ out:
    free(res2);
    free(res3);
    free(res4);
+   free(res5);
 
    return 0;
 }
