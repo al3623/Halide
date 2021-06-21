@@ -7,22 +7,22 @@ void blurtiles(u_int8_t* v,int M,int N,u_int8_t*output){
 		for (int H4 = 0; H4 < ((M) + (4) - 1 ) / (4); H4++) {
 			for (int H6 = 0; H6 < 6; H6++) {
 				for (int H7 = 0; H7 < 4; H7++) {
-					if ((H4) * (4) + H7 < M) {
-						if (0 <= (H3) * (4) + H6 - (1) && (H3) * (4) + H6 - (1) < N) {
-							u_int8_t tmp3 = 0;
-							u_int8_t tmp4 = 0;
-							if (0 <= (H4) * (4) + H7 - (1)) {
-								tmp4 = v[(((M)) * ((H3) * (4) + H6 - (1))) + (H4) * (4) + H7 - (1)];
-							}
-							u_int8_t tmp5 = 0;
-							tmp5 = v[(((M)) * ((H3) * (4) + H6 - (1))) + (H4) * (4) + H7];
-							tmp3 = tmp4 + tmp5;
-							u_int8_t tmp6 = 0;
-							if ((H4) * (4) + H7 + 1 < M) {
-								tmp6 = v[(((M)) * ((H3) * (4) + H6 - (1))) + (H4) * (4) + H7 + 1];
-							}
-							tmp2[(4) * (H6) + H7] = tmp3 + tmp6;
+					if (0 <= (H3) * (4) + H6 - (1) && (H3) * (4) + H6 - (1) < N) {
+						u_int8_t tmp3 = 0;
+						u_int8_t tmp4 = 0;
+						if (0 <= (H4) * (4) + H7 - (1) && (H4) * (4) + H7 - (1) < M) {
+							tmp4 = v[(((M)) * ((H3) * (4) + H6 - (1))) + (H4) * (4) + H7 - (1)];
 						}
+						u_int8_t tmp5 = 0;
+						if ((H4) * (4) + H7 < M) {
+							tmp5 = v[(((M)) * ((H3) * (4) + H6 - (1))) + (H4) * (4) + H7];
+						}
+						tmp3 = tmp4 + tmp5;
+						u_int8_t tmp6 = 0;
+						if ((H4) * (4) + H7 + 1 < M) {
+							tmp6 = v[(((M)) * ((H3) * (4) + H6 - (1))) + (H4) * (4) + H7 + 1];
+						}
+						tmp2[(4) * (H6) + H7] = tmp3 + tmp6;
 					}
 				}
 			}
@@ -33,13 +33,9 @@ void blurtiles(u_int8_t* v,int M,int N,u_int8_t*output){
 						if ((H3) * (4) + H20 < N) {
 							u_int8_t tmp7 = 0;
 							u_int8_t tmp8 = 0;
-							if (0 <= (H3) * (4) + H20 - (1)) {
-								tmp8 = x[(((4)) * (H20)) + H19];
-							}
+							tmp8 = x[(((4)) * (H20)) + H19];
 							u_int8_t tmp9 = 0;
-							if ((H4) * (4) + H19 < M) {
-								tmp9 = x[(((4)) * (H20 + 1)) + H19];
-							}
+							tmp9 = x[(((4)) * (H20 + 1)) + H19];
 							tmp7 = tmp8 + tmp9;
 							u_int8_t tmp10 = 0;
 							if ((H3) * (4) + H20 + 1 < N) {

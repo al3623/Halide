@@ -2,8 +2,8 @@
 #include "blurtwo.h"
 
 void blurtwo(u_int8_t* v,int M,int N,u_int8_t*output){
-	u_int8_t* tmp2 = (u_int8_t*) calloc(1,(N + 2) * (M) * sizeof (u_int8_t));
-	for (int H4 = 0; H4 < N + 2; H4++) {
+	u_int8_t* tmp2 = (u_int8_t*) calloc(1,((N + 2)) * (M) * sizeof (u_int8_t));
+	for (int H4 = 0; H4 < (N + 2); H4++) {
 		for (int H5 = 0; H5 < M; H5++) {
 			if (0 <= H4 - (1) && H4 - (1) < N) {
 				u_int8_t tmp3 = 0;

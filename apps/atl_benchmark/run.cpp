@@ -9,10 +9,12 @@
 // Instead, it depends on the header file that lesson_10_generate
 // produced when we ran it:
 #include "blur_immediate.h"
+#include "blur_immediate_sc.h"
 #include "blur_two_stage.h"
 #include "blur_tiled.h"
 
 #include "blurim.h"
+#include "blurpart.h"
 #include "blurtwo.h"
 #include "blurtiles.h"
 
@@ -34,6 +36,7 @@ int main(int argc, char **argv) {
 
 	Halide::Runtime::Buffer<uint8_t> input(M, N)
 			, output1(M, N)
+			, output1a(M, N)
 			, output2(M, N)
 			, output3(M, N);
 
@@ -57,6 +60,18 @@ int main(int argc, char **argv) {
         return -1;
     } else {
 		printf("immediate\t%d\t%d\t%gms\n",N,M,t*1000);
+	}
+	
+	error = 0;
+	t = Halide::Tools::benchmark(trials,1,[&]() { 
+    	error = immediate_sc(input, output1a);
+		});
+
+    if (error) {
+        printf("Halide returned an error: %d\n", error);
+        return -1;
+    } else {
+		printf("immediate sc\t%d\t%d\t%gms\n",N,M,t*1000);
 	}
 	
 	error = 0;
@@ -117,18 +132,29 @@ int main(int argc, char **argv) {
 		});
    printf("tiled 4 atl \t%d\t%d\t%gms\n",N,M,t*1000);
 
+   u_int8_t *res4 = (u_int8_t *) calloc(1,N*M* sizeof (u_int8_t));
+   t = Halide::Tools::benchmark(trials,1,[&]() { 
+    	blurpart(v,M,N,res4);
+		});
+   printf("blurpart atl \t%d\t%d\t%gms\n",N,M,t*1000);
+
    for (int y = 0; y < N; y++) {
         for (int x = 0; x < M; x++) {
 			int i = y * M + x;
 			uint8_t out1 = res1[i];
 			uint8_t out2 = res2[i];
 			uint8_t out3 = res3[i];
+			uint8_t out4 = res4[i];
 			if (out1 != out2) {
 				printf("Ohno atl :(\n");
 			}
 			if (out3 != out2) {
 				printf("Ohno atl :(\n");
 			}
+			if (out3 != out4) {
+				printf("Ohno atl :(\n");
+			}
+ 
         }
    }
  
@@ -138,7 +164,6 @@ int main(int argc, char **argv) {
 			uint8_t atlout = res1[i];
 			uint8_t halideout = output1(x,y);
 			if (atlout != halideout) {
-				// printf("(%d,%d): %d!=%d\n",x,y,atlout,halideout);
 				printf("Neq\n");
 				goto out;
 			}
@@ -150,6 +175,7 @@ out:
    free(res1);
    free(res2);
    free(res3);
+   free(res4);
 
    return 0;
 }
