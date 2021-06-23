@@ -30,14 +30,13 @@
 #include <stdio.h>
 
 int main(int argc, char **argv) {
-	int M = 1000;
-	int N = 1000;
+	int M = 2000;
+	int N = 2000;
 	int error = 0;
 	int trials = 30;
 
 	Halide::Runtime::Buffer<uint8_t> input(M, N)
 			, output1(M, N)
-			, output1a(M, N)
 			, output2(M, N)
 			, output3(M, N);
 
@@ -62,30 +61,42 @@ int main(int argc, char **argv) {
     } else {
 		printf("immediate\t%d\t%d\t%gms\n",N,M,t*1000);
 	}
-	
-	error = 0;
-	t = Halide::Tools::benchmark(trials,1,[&]() { 
-    	error = immediate_sc(input, output1a);
-		});
 
-    if (error) {
-        printf("Halide returned an error: %d\n", error);
-        return -1;
-    } else {
-		printf("immediate sc\t%d\t%d\t%gms\n",N,M,t*1000);
-	}
-	
+ 	u_int8_t *res1 = (u_int8_t *) calloc(1,N*M* sizeof (u_int8_t));
+ 	t = Halide::Tools::benchmark(trials,1,[&]() { 
+    	blurim(v,M,N,res1);
+		});
+    printf("blurim atl \t%d\t%d\t%gms\n",N,M,t*1000);
+ 
+	u_int8_t *res4 = (u_int8_t *) calloc(1,N*M* sizeof (u_int8_t));
+    t = Halide::Tools::benchmark(trials,1,[&]() { 
+    	blurpart(v,M,N,res4);
+		});
+    printf("blurimpart atl\t%d\t%d\t%gms\n",N,M,t*1000);
+
 	error = 0;
 	t = Halide::Tools::benchmark(trials,1,[&]() { 
     	error = two_stage(input, output2);
 		});
 	
-   if (error) {
-        printf("Halide returned an error: %d\n", error);
+	if (error) {
+    	printf("Halide returned an error: %d\n", error);
         return -1;
     } else {
 		printf("two_stage\t%d\t%d\t%gms\n", N,M,t*1000);
 	}
+
+	u_int8_t *res2 = (u_int8_t *) calloc(1,N*M* sizeof (u_int8_t));
+    t = Halide::Tools::benchmark(trials,1,[&]() { 
+    	blurtwo(v,M,N,res2);
+		});
+	printf("two stage atl \t%d\t%d\t%gms\n",N,M,t*1000);
+
+	u_int8_t *res5 = (u_int8_t *) calloc(1,N*M* sizeof (u_int8_t));
+    t = Halide::Tools::benchmark(trials,1,[&]() { 
+    	blurtwopart(v,M,N,res5);
+		});
+   	printf("blurtwopart atl\t%d\t%d\t%gms\n",N,M,t*1000);
 
 	error = 0;
 	t = Halide::Tools::benchmark(trials,1,[&]() { 
@@ -114,37 +125,11 @@ int main(int argc, char **argv) {
         }
    }
    
-	// ATL benchmarks
-   u_int8_t *res1 = (u_int8_t *) calloc(1,N*M* sizeof (u_int8_t));
-   t = Halide::Tools::benchmark(trials,1,[&]() { 
-    	blurim(v,M,N,res1);
-		});
-   printf("blurim atl \t%d\t%d\t%gms\n",N,M,t*1000);
-   
-   u_int8_t *res2 = (u_int8_t *) calloc(1,N*M* sizeof (u_int8_t));
-   t = Halide::Tools::benchmark(trials,1,[&]() { 
-    	blurtwo(v,M,N,res2);
-		});
-   printf("two stage atl \t%d\t%d\t%gms\n",N,M,t*1000);
-
    u_int8_t *res3 = (u_int8_t *) calloc(1,N*M* sizeof (u_int8_t));
    t = Halide::Tools::benchmark(trials,1,[&]() { 
     	blurtiles(v,M,N,res3);
 		});
    printf("tiled 4 atl \t%d\t%d\t%gms\n",N,M,t*1000);
-
-   u_int8_t *res4 = (u_int8_t *) calloc(1,N*M* sizeof (u_int8_t));
-   t = Halide::Tools::benchmark(trials,1,[&]() { 
-    	blurpart(v,M,N,res4);
-		});
-   printf("blurpart atl \t%d\t%d\t%gms\n",N,M,t*1000);
-
-   u_int8_t *res5 = (u_int8_t *) calloc(1,N*M* sizeof (u_int8_t));
-   t = Halide::Tools::benchmark(trials,1,[&]() { 
-    	blurtwopart(v,M,N,res5);
-		});
-   printf("blurtwopart atl \t%d\t%d\t%gms\n",N,M,t*1000);
-
 
    for (int y = 0; y < N; y++) {
         for (int x = 0; x < M; x++) {
