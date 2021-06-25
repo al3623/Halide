@@ -28,4 +28,4 @@ atl:
 	make -C atl
 
 clean:
-	rm -f run immediate_generate *.a *.h two_stage_generate tiled_generate
+	rm -f run immediate_generate *.a *.h *.c *.s
