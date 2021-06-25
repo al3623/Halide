@@ -7,6 +7,7 @@ void blurtwopart(u_int8_t* v,int M,int N,u_int8_t*output){
 	N = N & 0xFFFFFFFC; 
 	M = M & 0xFFFFFFFC; 
 	u_int8_t* tmp2 = (u_int8_t*) aligned_alloc(4,(((1 + (N + 1) - (1)) + N + 2 - (N + 1))) * (M) * sizeof (u_int8_t));
+	//u_int8_t* tmp2 = (u_int8_t*) calloc(1,(((1 + (N + 1) - (1)) + N + 2 - (N + 1))) * (M) * sizeof (u_int8_t));
 	for (int H6 = 0; H6 < 1; H6++) {
 		for (int H7 = 0; H7 < M; H7++) {
 			tmp2[(M) * (H6) + H7] = 0;

@@ -78,6 +78,7 @@ int main(int argc, char **argv) {
     blur_y.compile_to_static_library("blur_tiled", {image}, "tiled");
     blur_y.compile_to_c("blur_tiled.c", {image}, "tiled");
 	blur_y.print_loop_nest();
+	blur_y.compile_to_assembly("blur_tiled.s", {image}, "tiled");
 
     printf("Halide pipeline compiled, but not yet run.\n");
 
