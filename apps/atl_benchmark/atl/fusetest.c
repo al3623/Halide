@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include "fusetest.h"
 
-void fusetest(int m,int n,u_int8_t* v,u_int8_t*output){
+void fusetest(int m,int n,float* v,float*output){
 	for (int H4 = 0; H4 < n; H4++) {
 		for (int H5 = 0; H5 < m; H5++) {
 			output[(m) * (H4) + H5] = v[(((m)) * (H4)) + H5];

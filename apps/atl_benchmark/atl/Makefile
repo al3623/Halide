@@ -11,7 +11,7 @@ libscheds.a: $(OBJECTS)
 	ranlib $@
 
 %.o: %.c
-	$(CC) -g -Wall -O3 -c $^ -o $@
+	$(CC) -g -Wall -ffast-math -O3 -c $^ -o $@
 
 .PHONY: clean scrub
 
@@ -19,4 +19,4 @@ scrub:
 	./cleanoutput.sh $(GENFILE)
 
 clean:
-	rm -f *.o a.out core main *.a (GENFILE)
+	rm -f *.o a.out core main *.a $(GENFILE)

@@ -12,9 +12,9 @@
 #include "blur_two_stage_float.h"
 #include "blur_tiled_float.h"
 
-#include "blurpartf.h"
-#include "blurtwopartf.h"
-#include "blurtilesf.h"
+#include "blurpart.h"
+#include "blurtwopart.h"
+#include "blurtiles.h"
 
 // We want to continue to use our Halide::Buffer with AOT-compiled
 // code, so we explicitly include it. It's a header-only class, and
@@ -61,7 +61,7 @@ int main(int argc, char **argv) {
 
  	float *res2 = (float *) calloc(1,N*M* sizeof (float));
  	t = Halide::Tools::benchmark(trials,1,[&]() { 
-    	blurpartf(vf,M,N,res2);
+    	blurpart(vf,M,N,res2);
 		});
     printf("immediate atl f\t%d\t%d\t%gms\n",N,M,t*1000);
  
@@ -80,7 +80,7 @@ int main(int argc, char **argv) {
 
 	float *res3 = (float *) calloc(1,N*M* sizeof (float));
     t = Halide::Tools::benchmark(trials,1,[&]() { 
-    	blurtwopartf(vf,M,N,res3);
+    	blurtwopart(vf,M,N,res3);
 		});
    	printf("two stage atlf\t%d\t%d\t%gms\n",N,M,t*1000);
 
@@ -97,7 +97,7 @@ int main(int argc, char **argv) {
 
    float *res1 = (float *) calloc(1,N*M* sizeof (float));
    t = Halide::Tools::benchmark(trials,1,[&]() { 
-    	blurtilesf(vf,M,N,res1);
+    	blurtiles(vf,M,N,res1);
 		});
    printf("tiled 4 atl f \t%d\t%d\t%gms\n",N,M,t*1000);
 
