@@ -11,7 +11,7 @@ libscheds.a: $(OBJECTS)
 	ranlib $@
 
 %.o: %.c
-	$(CC) -g -Wall -ffast-math -O3 -c $^ -o $@
+	$(CC) -g -Wall -O3 -c $^ -o $@
 
 .PHONY: clean scrub
 

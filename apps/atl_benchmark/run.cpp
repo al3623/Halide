@@ -9,12 +9,12 @@
 // Instead, it depends on the header file that lesson_10_generate
 // produced when we ran it:
 #include "blur_immediate_float.h"
-#include "blur_two_stage.h"
-#include "blur_tiled.h"
+#include "blur_two_stage_float.h"
+#include "blur_tiled_float.h"
 
 #include "blurpartf.h"
-#include "blurtwopart.h"
-#include "blurtiles.h"
+#include "blurtwopartf.h"
+#include "blurtilesf.h"
 
 // We want to continue to use our Halide::Buffer with AOT-compiled
 // code, so we explicitly include it. It's a header-only class, and
@@ -33,30 +33,17 @@ int main(int argc, char **argv) {
 	int trials = 30;
 	double t = 0; 
 
-	Halide::Runtime::Buffer<uint8_t> input(M, N)
-			, output2(M, N)
-			, output3(M, N);
-
 	Halide::Runtime::Buffer<float> inputf(M, N)
-			, outputf(M, N);
-
-	halide_buffer_t ptr = input.get_buf();
-	uint8_t *v = ptr.host;
+			, outputf(M, N)
+			, outputf2(M, N)
+			, outputf1(M,N);
 
 	halide_buffer_t ptrf = inputf.get_buf();
 	float *vf = (float *) ptrf.host;
 
-
-    for (int y = 0; y < N; y++) {
-        for (int x = 0; x < M; x++) {
-			input(x,y) = (uint8_t) rand();
-			// (uint8_t) (x+y);
-        }
-    }
- 
 	for (int y = 0; y < N; y++) {
         for (int x = 0; x < M; x++) {
-			inputf(x,y) = (float) rand();
+			inputf(x,y) = (float) (random() % 10);
         }
     }
  
@@ -78,80 +65,84 @@ int main(int argc, char **argv) {
 		});
     printf("immediate atl f\t%d\t%d\t%gms\n",N,M,t*1000);
  
+
 	error = 0;
 	t = Halide::Tools::benchmark(trials,1,[&]() { 
-    	error = two_stage(input, output2);
+    	error = two_stage_float(inputf, outputf1);
 		});
 	
 	if (error) {
     	printf("Halide returned an error: %d\n", error);
         return -1;
     } else {
-		printf("two_stage\t%d\t%d\t%gms\n", N,M,t*1000);
+		printf("two_stage f\t%d\t%d\t%gms\n", N,M,t*1000);
 	}
 
-	u_int8_t *res5 = (u_int8_t *) calloc(1,N*M* sizeof (u_int8_t));
+	float *res6 = (float *) calloc(1,N*M* sizeof (float));
     t = Halide::Tools::benchmark(trials,1,[&]() { 
-    	blurtwopart(v,M,N,res5);
+    	blurtwopartf(vf,M,N,res6);
 		});
-   	printf("two stage atl\t%d\t%d\t%gms\n",N,M,t*1000);
+   	printf("two stage atlf\t%d\t%d\t%gms\n",N,M,t*1000);
 
-	error = 0;
+   error = 0;
 	t = Halide::Tools::benchmark(trials,1,[&]() { 
-    	error = tiled(input, output3);
+    	error = tiled_float(inputf, outputf2);
 		});
-	
    if (error) {
         printf("Halide returned an error: %d\n", error);
         return -1;
     } else {
-		printf("tiled_4 \t%d\t%d\t%gms\n", N,M,t*1000);
+		printf("tiled_4 f\t%d\t%d\t%gms\n", N,M,t*1000);
 	}
+
+   float *res1 = (float *) calloc(1,N*M* sizeof (float));
+   t = Halide::Tools::benchmark(trials,1,[&]() { 
+    	blurtilesf(vf,M,N,res1);
+		});
+   printf("tiled 4 atl f \t%d\t%d\t%gms\n",N,M,t*1000);
+
+
 
    // Halide is equivalent
    for (int y = 0; y < N; y++) {
         for (int x = 0; x < M; x++) {
-			uint8_t out2 = output2(x,y);
-			uint8_t out3 = output3(x,y);
-			if (out3 != out2) {
-				printf("Ohno tile two :(\n");
-			}
         }
    }
-   
-   u_int8_t *res3 = (u_int8_t *) calloc(1,N*M* sizeof (u_int8_t));
-   t = Halide::Tools::benchmark(trials,1,[&]() { 
-    	blurtiles(v,M,N,res3);
-		});
-   printf("tiled 4 atl \t%d\t%d\t%gms\n",N,M,t*1000);
-
+ 
    for (int y = 0; y < N; y++) {
         for (int x = 0; x < M; x++) {
 			int i = y * M + x;
-			uint8_t out3 = res3[i];
-			uint8_t out5 = res5[i];
- 			if (out5 != out3) {
-				printf("Ohno atl :(\n");
-			}
+			float out3f = resf[i];
+			float out6f = res6[i];
         }
    }
  
    for (int y = 0; y < N; y++) {
 		for (int x = 0; x < M; x++) {
 			int i = y * M + x;
-			uint8_t atlout = res3[i];
-			uint8_t halideout = output2(x,y);
-			if (atlout != halideout) {
-				printf("Neq\n");
+			float atloutf = resf[i];
+			float atloutf1 = res1[i];
+			float halideoutf = outputf(x,y);
+			float halidetwof = outputf1(x,y);
+			float halidetilef = outputf2(x,y);
+			float atltwof = res6[i];
+			if (atloutf != halideoutf) {
+				printf("Neq f\n");
 				goto out;
 			}
+			if (atltwof != halidetwof) {
+				printf("Neq f\n");
+				goto out;
+			}
+			if (atloutf1 != halidetilef) {
+				printf("Neq f\n");
+				goto out;
+			}
+	
        }
    }
 
 out:
- 
-   free(res3);
-   free(res5);
 
    return 0;
 }
