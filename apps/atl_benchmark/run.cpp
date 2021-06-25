@@ -33,23 +33,23 @@ int main(int argc, char **argv) {
 	int trials = 30;
 	double t = 0; 
 
-	Halide::Runtime::Buffer<float> inputf(M, N)
-			, outputf(M, N)
-			, outputf2(M, N)
-			, outputf1(M,N);
+	Halide::Runtime::Buffer<float> input(M, N)
+			, output1(M, N)
+			, output2(M, N)
+			, output3(M,N);
 
-	halide_buffer_t ptrf = inputf.get_buf();
+	halide_buffer_t ptrf = input.get_buf();
 	float *vf = (float *) ptrf.host;
 
 	for (int y = 0; y < N; y++) {
         for (int x = 0; x < M; x++) {
-			inputf(x,y) = (float) (random() % 10);
+			input(x,y) = (float) (random() % 10);
         }
     }
  
 	error = 0;
 	t = Halide::Tools::benchmark(trials,1,[&]() { 
-    	error = immediate_float(inputf, outputf);
+    	error = immediate_float(input, output1);
 		});
 
     if (error) {
@@ -59,16 +59,16 @@ int main(int argc, char **argv) {
 		printf("immediate f\t%d\t%d\t%gms\n",N,M,t*1000);
 	}
 
- 	float *resf = (float *) calloc(1,N*M* sizeof (float));
+ 	float *res2 = (float *) calloc(1,N*M* sizeof (float));
  	t = Halide::Tools::benchmark(trials,1,[&]() { 
-    	blurpartf(vf,M,N,resf);
+    	blurpartf(vf,M,N,res2);
 		});
     printf("immediate atl f\t%d\t%d\t%gms\n",N,M,t*1000);
  
 
 	error = 0;
 	t = Halide::Tools::benchmark(trials,1,[&]() { 
-    	error = two_stage_float(inputf, outputf1);
+    	error = two_stage_float(input, output3);
 		});
 	
 	if (error) {
@@ -78,15 +78,15 @@ int main(int argc, char **argv) {
 		printf("two_stage f\t%d\t%d\t%gms\n", N,M,t*1000);
 	}
 
-	float *res6 = (float *) calloc(1,N*M* sizeof (float));
+	float *res3 = (float *) calloc(1,N*M* sizeof (float));
     t = Halide::Tools::benchmark(trials,1,[&]() { 
-    	blurtwopartf(vf,M,N,res6);
+    	blurtwopartf(vf,M,N,res3);
 		});
    	printf("two stage atlf\t%d\t%d\t%gms\n",N,M,t*1000);
 
    error = 0;
 	t = Halide::Tools::benchmark(trials,1,[&]() { 
-    	error = tiled_float(inputf, outputf2);
+    	error = tiled_float(input, output2);
 		});
    if (error) {
         printf("Halide returned an error: %d\n", error);
@@ -112,29 +112,46 @@ int main(int argc, char **argv) {
    for (int y = 0; y < N; y++) {
         for (int x = 0; x < M; x++) {
 			int i = y * M + x;
-			float out3f = resf[i];
-			float out6f = res6[i];
+			float out3f = res2[i];
+			float out6f = res3[i];
         }
    }
  
    for (int y = 0; y < N; y++) {
 		for (int x = 0; x < M; x++) {
 			int i = y * M + x;
-			float atloutf = resf[i];
-			float atloutf1 = res1[i];
-			float halideoutf = outputf(x,y);
-			float halidetwof = outputf1(x,y);
-			float halidetilef = outputf2(x,y);
-			float atltwof = res6[i];
-			if (atloutf != halideoutf) {
+			float atlout1 = res1[i];
+			float atlout2 = res2[i];
+			float atlout3 = res3[i];
+			float halideoutf = output1(x,y);
+			float halidetwof = output3(x,y);
+			float halidetilef = output2(x,y);
+
+			if (atlout2 != atlout1) {
 				printf("Neq f\n");
 				goto out;
 			}
-			if (atltwof != halidetwof) {
+			if (atlout2 != atlout3) {
 				printf("Neq f\n");
 				goto out;
 			}
-			if (atloutf1 != halidetilef) {
+			if (halidetwof != halidetilef) {
+				printf("Neq f\n");
+				goto out;
+			}
+			if (halidetwof != halideoutf) {
+				printf("Neq f\n");
+				goto out;
+			}
+			if (atlout2 != halideoutf) {
+				printf("Neq f\n");
+				goto out;
+			}
+			if (atlout3 != halidetwof) {
+				printf("Neq f\n");
+				goto out;
+			}
+			if (atlout1 != halidetilef) {
 				printf("Neq f\n");
 				goto out;
 			}
