@@ -2,6 +2,8 @@
 #include "blurtiles.h"
 
 void blurtiles(u_int8_t* v,int M,int N,u_int8_t*output){
+	v = (u_int8_t *) __builtin_assume_aligned (v, 4);
+	output = (u_int8_t *) __builtin_assume_aligned (output, 4);
 	u_int8_t* tmp2 = (u_int8_t*) aligned_alloc(4,(6) * (4) * sizeof (u_int8_t));
 	for (int H3 = 0; H3 < ((N) + (4) - 1 ) / (4); H3++) {
 		for (int H4 = 0; H4 < ((M) + (4) - 1 ) / (4); H4++) {

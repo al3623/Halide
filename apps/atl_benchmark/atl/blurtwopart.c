@@ -2,8 +2,10 @@
 #include "blurtwopart.h"
 
 void blurtwopart(u_int8_t* v,int M,int N,u_int8_t*output){
-	v = (u_int8_t *) __builtin_assume_aligned (v, 8);
-	output = (u_int8_t *) __builtin_assume_aligned (output, 8);
+	v = (u_int8_t *) __builtin_assume_aligned (v, 4);
+	output = (u_int8_t *) __builtin_assume_aligned (output, 4);
+	N = N & 0xFFFFFFFC; 
+	M = M & 0xFFFFFFFC; 
 	u_int8_t* tmp2 = (u_int8_t*) aligned_alloc(4,(((1 + (N + 1) - (1)) + N + 2 - (N + 1))) * (M) * sizeof (u_int8_t));
 	for (int H6 = 0; H6 < 1; H6++) {
 		for (int H7 = 0; H7 < M; H7++) {
