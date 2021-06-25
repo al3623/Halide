@@ -11,7 +11,7 @@ libscheds.a: $(OBJECTS)
 	ranlib $@
 
 %.o: %.c
-	$(CC) -g -Wall -ffast-math -O3 -fno-tree-vectorize -c $^ -o $@
+	$(CC) -g -Wall -ffast-math -O3 -c $^ -o $@
 
 .PHONY: clean scrub
 
