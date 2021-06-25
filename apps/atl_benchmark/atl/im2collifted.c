@@ -2,7 +2,7 @@
 #include "im2collifted.h"
 
 void im2collifted(u_int8_t* x,u_int8_t* w,int RR,int W,int K,int B,int A,u_int8_t*output){
-	u_int8_t* tmp2 = (u_int8_t*) calloc(1,(W) * (RR) * sizeof (u_int8_t));
+	u_int8_t* tmp2 = (u_int8_t*) aligned_alloc(4,(W) * (RR) * sizeof (u_int8_t));
 	for (int H6 = 0; H6 < W; H6++) {
 		for (int H7 = 0; H7 < RR; H7++) {
 			if (H6 + H7 < K) {

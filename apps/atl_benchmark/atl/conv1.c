@@ -2,7 +2,7 @@
 #include "conv1.h"
 
 void conv1(int m,int n,u_int8_t* c,u_int8_t*output){
-	u_int8_t* tmp4 = (u_int8_t*) calloc(1,(n - ((-(m)) + 1)) * sizeof (u_int8_t));
+	u_int8_t* tmp4 = (u_int8_t*) aligned_alloc(4,(n - ((-(m)) + 1)) * sizeof (u_int8_t));
 	for (int H3 = 0; H3 < n; H3++) {
 		for (int H4 = 0; H4 < m; H4++) {
 			u_int8_t tmp2 = 0;

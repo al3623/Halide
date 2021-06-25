@@ -8,14 +8,11 @@
 //
 // Instead, it depends on the header file that lesson_10_generate
 // produced when we ran it:
-#include "blur_immediate.h"
-#include "blur_immediate_sc.h"
+#include "blur_immediate_float.h"
 #include "blur_two_stage.h"
 #include "blur_tiled.h"
 
-#include "blurim.h"
-#include "blurpart.h"
-#include "blurtwo.h"
+#include "blurpartf.h"
 #include "blurtwopart.h"
 #include "blurtiles.h"
 
@@ -34,14 +31,21 @@ int main(int argc, char **argv) {
 	int N = 2000;
 	int error = 0;
 	int trials = 30;
+	double t = 0; 
 
 	Halide::Runtime::Buffer<uint8_t> input(M, N)
-			, output1(M, N)
 			, output2(M, N)
 			, output3(M, N);
 
+	Halide::Runtime::Buffer<float> inputf(M, N)
+			, outputf(M, N);
+
 	halide_buffer_t ptr = input.get_buf();
 	uint8_t *v = ptr.host;
+
+	halide_buffer_t ptrf = inputf.get_buf();
+	float *vf = (float *) ptrf.host;
+
 
     for (int y = 0; y < N; y++) {
         for (int x = 0; x < M; x++) {
@@ -50,30 +54,30 @@ int main(int argc, char **argv) {
         }
     }
  
+	for (int y = 0; y < N; y++) {
+        for (int x = 0; x < M; x++) {
+			inputf(x,y) = (float) rand();
+        }
+    }
+ 
 	error = 0;
-	double t = Halide::Tools::benchmark(trials,1,[&]() { 
-    	error = immediate(input, output1);
+	t = Halide::Tools::benchmark(trials,1,[&]() { 
+    	error = immediate_float(inputf, outputf);
 		});
 
     if (error) {
         printf("Halide returned an error: %d\n", error);
         return -1;
     } else {
-		printf("immediate\t%d\t%d\t%gms\n",N,M,t*1000);
+		printf("immediate f\t%d\t%d\t%gms\n",N,M,t*1000);
 	}
 
- 	u_int8_t *res1 = (u_int8_t *) calloc(1,N*M* sizeof (u_int8_t));
+ 	float *resf = (float *) calloc(1,N*M* sizeof (float));
  	t = Halide::Tools::benchmark(trials,1,[&]() { 
-    	blurim(v,M,N,res1);
+    	blurpartf(vf,M,N,resf);
 		});
-    printf("blurim atl \t%d\t%d\t%gms\n",N,M,t*1000);
+    printf("immediate atl f\t%d\t%d\t%gms\n",N,M,t*1000);
  
-	u_int8_t *res4 = (u_int8_t *) calloc(1,N*M* sizeof (u_int8_t));
-    t = Halide::Tools::benchmark(trials,1,[&]() { 
-    	blurpart(v,M,N,res4);
-		});
-    printf("blurimpart atl\t%d\t%d\t%gms\n",N,M,t*1000);
-
 	error = 0;
 	t = Halide::Tools::benchmark(trials,1,[&]() { 
     	error = two_stage(input, output2);
@@ -86,17 +90,11 @@ int main(int argc, char **argv) {
 		printf("two_stage\t%d\t%d\t%gms\n", N,M,t*1000);
 	}
 
-	u_int8_t *res2 = (u_int8_t *) calloc(1,N*M* sizeof (u_int8_t));
-    t = Halide::Tools::benchmark(trials,1,[&]() { 
-    	blurtwo(v,M,N,res2);
-		});
-	printf("two stage atl \t%d\t%d\t%gms\n",N,M,t*1000);
-
 	u_int8_t *res5 = (u_int8_t *) calloc(1,N*M* sizeof (u_int8_t));
     t = Halide::Tools::benchmark(trials,1,[&]() { 
     	blurtwopart(v,M,N,res5);
 		});
-   	printf("blurtwopart atl\t%d\t%d\t%gms\n",N,M,t*1000);
+   	printf("two stage atl\t%d\t%d\t%gms\n",N,M,t*1000);
 
 	error = 0;
 	t = Halide::Tools::benchmark(trials,1,[&]() { 
@@ -113,12 +111,8 @@ int main(int argc, char **argv) {
    // Halide is equivalent
    for (int y = 0; y < N; y++) {
         for (int x = 0; x < M; x++) {
-			uint8_t out1 = output1(x,y);
 			uint8_t out2 = output2(x,y);
 			uint8_t out3 = output3(x,y);
-			if (out1 != out2) {
-				printf("Ohno im two :(\n");
-			}
 			if (out3 != out2) {
 				printf("Ohno tile two :(\n");
 			}
@@ -134,21 +128,9 @@ int main(int argc, char **argv) {
    for (int y = 0; y < N; y++) {
         for (int x = 0; x < M; x++) {
 			int i = y * M + x;
-			uint8_t out1 = res1[i];
-			uint8_t out2 = res2[i];
 			uint8_t out3 = res3[i];
-			uint8_t out4 = res4[i];
 			uint8_t out5 = res5[i];
-			if (out1 != out2) {
-				printf("Ohno atl :(\n");
-			}
-			if (out3 != out2) {
-				printf("Ohno atl :(\n");
-			}
-			if (out3 != out4) {
-				printf("Ohno atl :(\n");
-			}
- 			if (out5 != out4) {
+ 			if (out5 != out3) {
 				printf("Ohno atl :(\n");
 			}
         }
@@ -157,8 +139,8 @@ int main(int argc, char **argv) {
    for (int y = 0; y < N; y++) {
 		for (int x = 0; x < M; x++) {
 			int i = y * M + x;
-			uint8_t atlout = res1[i];
-			uint8_t halideout = output1(x,y);
+			uint8_t atlout = res3[i];
+			uint8_t halideout = output2(x,y);
 			if (atlout != halideout) {
 				printf("Neq\n");
 				goto out;
@@ -168,10 +150,7 @@ int main(int argc, char **argv) {
 
 out:
  
-   free(res1);
-   free(res2);
    free(res3);
-   free(res4);
    free(res5);
 
    return 0;

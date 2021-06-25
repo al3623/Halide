@@ -41,32 +41,7 @@ int main(int argc, char **argv) {
     Func blur_x("blur_x");
 	Func blur_y("blur_y");
     Var x("x"), y("y");
-	// The algorithm
 
-	/*
-	Func clamped("clamped");
-	clamped(x,y) = image(clamp(x,0,image.width()-1),clamp(y,0,image.height()-1));
-
-	Func guardx("guardx");
-	guardx(x,y) = select(0 <= x && x < image.width()
-					, clamped(x,y)
-					, 0);
-
-	blur_x(x, y) = (guardx(x-1, y) + guardx(x, y) + guardx(x +1, y));
-
-	Func guardy("guardy");
-	guardy(x,y) = select(0 <= y && y < image.height()
-					, blur_x(x,y)
-					, 0);
-	blur_y(x, y) = guardy(x, y-1) + guardy(x, y) + guardy(x, y + 1);
-	*/
-	/*
-	Func clamped("clamped");
-	clamped(x,y) = image(clamp(x,0,image.width()-1),clamp(y,0,image.height()-1));
-
-	blur_x(x, y) = (clamped(x-1, y) + clamped(x, y) + clamped(x +1, y));
-	blur_y(x, y) = blur_x(x, y-1) + blur_x(x, y) + blur_x(x, y + 1);
-	*/
 	Func input = BoundaryConditions::constant_exterior(image,0);
 
 	blur_x(x, y) = (input(x-1, y) + input(x, y) + input(x + 1, y));
@@ -76,12 +51,11 @@ int main(int argc, char **argv) {
 	blur_x.compute_root();
 
     blur_y.compile_to_static_library("blur_two_stage", {image}, "two_stage");
+	blur_y.compile_to_assembly("blur_two_stage.s", {image}, "immediate_float");
     blur_y.print_loop_nest();
     blur_y.compile_to_c("blur_two_stage.c", {image}, "two_stage");
 
     printf("Halide pipeline compiled, but not yet run.\n");
-
-    // To continue this lesson, look in the file lesson_10_aot_compilation_run.cpp
 
     return 0;
 }

@@ -19,4 +19,4 @@ scrub:
 	./cleanoutput.sh $(GENFILE)
 
 clean:
-	rm -f *.o a.out core main *.a $(GENFILE)
+	rm -f *.o a.out core main *.a (GENFILE)

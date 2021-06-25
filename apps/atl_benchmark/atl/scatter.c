@@ -2,7 +2,7 @@
 #include "scatter.h"
 
 void scatter(u_int8_t* w,u_int8_t* x,int C,int W,u_int8_t*output){
-	u_int8_t* tmp2 = (u_int8_t*) calloc(1,(W) * sizeof (u_int8_t));
+	u_int8_t* tmp2 = (u_int8_t*) aligned_alloc(4,(W) * sizeof (u_int8_t));
 	for (int H5 = 0; H5 < W; H5++) {
 		for (int H7 = 0; H7 < W; H7++) {
 			if (0 <= H5 - (H7)) {
