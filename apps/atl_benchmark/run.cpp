@@ -12,9 +12,11 @@
 #include "blur_two_stage_float.h"
 #include "blur_tiled_float.h"
 
+extern "C" {
 #include "blurpart.h"
 #include "blurtwopart.h"
 #include "blurtiles.h"
+}
 
 // We want to continue to use our Halide::Buffer with AOT-compiled
 // code, so we explicitly include it. It's a header-only class, and

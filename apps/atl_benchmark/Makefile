@@ -1,4 +1,4 @@
-CC := g++
+CC := clang++
 STEMS	:= $(wildcard blur*.cpp)
 LIBS := $(patsubst %.cpp,%.a, $(STEMS))
 
