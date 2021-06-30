@@ -1,3 +1,3 @@
 #include <stdlib.h>
 
-void blurtwo(float* v,int M,int N,float*output);
+void            blurtwo(float *v, int M, int N, float *output);

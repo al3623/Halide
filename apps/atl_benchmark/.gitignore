@@ -1,0 +1,5 @@
+run
+blur_*.c
+blur_*.gen
+blur_*.h
+blur_*.s

@@ -1,4 +1,4 @@
-CC = g++
+CC = clang
 CFLAGS = -g -Wall
 LDFLAGS = -g
 
@@ -16,7 +16,8 @@ libscheds.a: $(OBJECTS)
 .PHONY: clean scrub
 
 scrub: 
-	./cleanoutput.sh $(GENFILE)
+	python cleanoutput.py
+	rm *.BAK
 
 clean:
-	rm -f *.o a.out core main *.a $(GENFILE)
+	rm -f *.o a.out core main *.a *.c *.h *.BAK

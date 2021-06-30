@@ -1,3 +1,3 @@
 #include <stdlib.h>
 
-void fusetest(int m,int n,float* v,float*output);
+void            fusetest(int m, int n, float *v, float *output);

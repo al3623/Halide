@@ -1,5 +1,4 @@
 #include "Halide.h"
-#include "Pipeline.h"
 #include <stdio.h>
 using namespace Halide;
 
