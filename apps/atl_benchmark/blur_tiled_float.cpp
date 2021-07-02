@@ -1,4 +1,5 @@
 #include "Halide.h"
+#include "Schedule.h"
 #include <stdio.h>
 using namespace Halide;
 
@@ -15,7 +16,7 @@ int main(int argc, char **argv) {
 	blur_x(x, y) = (input(x-1, y) + input(x, y) + input(x + 1, y));
 	blur_y(x, y) = (blur_x(x, y-1) + blur_x(x, y) + blur_x(x, y + 1));
 
-	blur_y.tile(x, y, xo, yo, xi, yi, 4, 4);
+	blur_y.tile(x, y, xo, yo, xi, yi, 64, 64,TailStrategy::ShiftInwards);
     blur_x.compute_at(blur_y, xo);
 	
     blur_y.compile_to_static_library("blur_tiled_float", {image}, "tiled_float");
