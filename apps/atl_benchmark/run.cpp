@@ -30,8 +30,8 @@ extern "C" {
 #include <stdio.h>
 
 int main(int argc, char **argv) {
-	int M = 3000;
-	int N = 3000;
+	int M = 2000;
+	int N = 2000;
 	int error = 0;
 	int trials = 30;
 	double t = 0; 
@@ -114,7 +114,7 @@ int main(int argc, char **argv) {
    t = Halide::Tools::benchmark(trials,1,[&]() { 
     	blurtiles(vf,M,N,res1);
 		});
-   printf("ATL\ttiled\t%d\t%d\t%g\n",N,M,t*1000);
+   printf("ATL\ttiled guard\t%d\t%d\t%g\n",N,M,t*1000);
 
    // Halide is equivalent
    for (int y = 0; y < N; y++) {
