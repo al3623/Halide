@@ -11,6 +11,7 @@
 #include "blur_immediate_float.h"
 #include "blur_two_stage_float.h"
 #include "blur_tiled_float.h"
+//#include "blur_tiled_float_guard.h"
 
 extern "C" {
 #include "blurpart.h"
@@ -36,6 +37,7 @@ int main(int argc, char **argv) {
 	Halide::Runtime::Buffer<float> input(M, N)
 			, output1(M, N)
 			, output2(M, N)
+			, output4(M, N)
 			, output3(M,N);
 
 	halide_buffer_t ptrf = input.get_buf();
@@ -56,14 +58,14 @@ int main(int argc, char **argv) {
         printf("Halide returned an error: %d\n", error);
         return -1;
     } else {
-		printf("immediate f\t%d\t%d\t%gms\n",N,M,t*1000);
+		printf("Halide\timmediate\t%d\t%d\t%g\n",N,M,t*1000);
 	}
 
  	float *res2 = (float *) calloc(1,N*M* sizeof (float));
  	t = Halide::Tools::benchmark(trials,1,[&]() { 
     	blurpart(vf,M,N,res2);
 		});
-    printf("immediate atl f\t%d\t%d\t%gms\n",N,M,t*1000);
+    printf("ATL\timmediate\t%d\t%d\t%g\n",N,M,t*1000);
  
 
 	error = 0;
@@ -75,14 +77,25 @@ int main(int argc, char **argv) {
     	printf("Halide returned an error: %d\n", error);
         return -1;
     } else {
-		printf("two_stage f\t%d\t%d\t%gms\n", N,M,t*1000);
+		printf("Halide\ttwo_stage\t%d\t%d\t%g\n", N,M,t*1000);
 	}
 
 	float *res3 = (float *) calloc(1,N*M* sizeof (float));
     t = Halide::Tools::benchmark(trials,1,[&]() { 
     	blurtwopart(vf,M,N,res3);
 		});
-   	printf("two stage atlf\t%d\t%d\t%gms\n",N,M,t*1000);
+   	printf("ATL\ttwo stage\t%d\t%d\t%g\n",N,M,t*1000);
+
+ 	/*error = 0;
+	t = Halide::Tools::benchmark(trials,1,[&]() { 
+    	error = tiled_float_guard(input, output4);
+		});
+   if (error) {
+        printf("Halide returned an error: %d\n", error);
+        return -1;
+    } else {
+		printf("Halide\ttiled guard\t%d\t%d\t%g\n", N,M,t*1000);
+	}*/
 
    error = 0;
 	t = Halide::Tools::benchmark(trials,1,[&]() { 
@@ -92,16 +105,14 @@ int main(int argc, char **argv) {
         printf("Halide returned an error: %d\n", error);
         return -1;
     } else {
-		printf("tiled_4 f\t%d\t%d\t%gms\n", N,M,t*1000);
+		printf("Halide\ttiled shift\t%d\t%d\t%g\n", N,M,t*1000);
 	}
 
    float *res1 = (float *) calloc(1,N*M* sizeof (float));
    t = Halide::Tools::benchmark(trials,1,[&]() { 
     	blurtiles(vf,M,N,res1);
 		});
-   printf("tiled 4 atl f \t%d\t%d\t%gms\n",N,M,t*1000);
-
-
+   printf("ATL\ttiled guard\t%d\t%d\t%g\n",N,M,t*1000);
 
    // Halide is equivalent
    for (int y = 0; y < N; y++) {
@@ -126,6 +137,7 @@ int main(int argc, char **argv) {
 			float halideoutf = output1(x,y);
 			float halidetwof = output3(x,y);
 			float halidetilef = output2(x,y);
+			float halidetileshiftf = output4(x,y);
 
 			if (atlout2 != atlout1) {
 				printf("Neq f\n");
@@ -138,6 +150,10 @@ int main(int argc, char **argv) {
 			if (halidetwof != halidetilef) {
 				printf("Neq f\n");
 				goto out;
+			}
+			if (halidetilef != halidetileshiftf) {
+					printf("Neq\n");
+					goto out;
 			}
 			if (halidetwof != halideoutf) {
 				printf("Neq f\n");

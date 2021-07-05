@@ -1,3 +1,3 @@
 #include <stdlib.h>
 
-void            blurtiles(float *v, int M, int N, float *output);
+void            blurtiles(float *l, int m, int n, float *output);

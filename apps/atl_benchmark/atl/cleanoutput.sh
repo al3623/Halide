@@ -1,12 +1,11 @@
-#
-sed 's/\\n/\'$'\n''/g' $1 > out1.txt
-sed 's/"//g' out1.txt > out2.txt
-sed 's/@/"/g' out2.txt > out3.txt
-sed 's/~/\\n/g' out3.txt > out4.txt
-vim -c "normal gg=G" -c "%s/COQ.*//g" -c "%s/\\$//g" -c wq out4.txt
-sed '/./,$!d' out4.txt > tmp
-mv tmp out5.txt
-csplit --quiet --elide-empty-files --suffix-format='%d.out' out5.txt '/!!!/' '{*}'
+sed -i 's/\\n/\'$'\n''/g' $1
+sed -i 's/"//g' $1
+sed -i 's/@/"/g' $1
+sed -i 's/~/\\n/g' $1
+vim -c "normal gg=G" -c "%s/COQ.*//g" -c "%s/\\$//g" -c wq $1
+sed '/./,$!d' $1 > tmp
+mv tmp $1
+csplit --quiet --elide-empty-files --suffix-format='%d.out' $1 '/!!!/' '{*}'
 
 out_to_c() {
 	sed -i '1d' $1
