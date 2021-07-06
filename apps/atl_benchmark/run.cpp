@@ -10,6 +10,7 @@
 // produced when we ran it:
 #include "blur_immediate_float.h"
 #include "blur_two_stage_float.h"
+#include "blur_tiled_float_guard.h"
 #include "blur_tiled_float.h"
 //#include "blur_tiled_float_guard.h"
 
@@ -86,7 +87,7 @@ int main(int argc, char **argv) {
 		});
    	printf("ATL\ttwo stage\t%d\t%d\t%g\n",N,M,t*1000);
 
- 	/*error = 0;
+	error = 0;
 	t = Halide::Tools::benchmark(trials,1,[&]() { 
     	error = tiled_float_guard(input, output4);
 		});
@@ -95,7 +96,7 @@ int main(int argc, char **argv) {
         return -1;
     } else {
 		printf("Halide\ttiled guard\t%d\t%d\t%g\n", N,M,t*1000);
-	}*/
+	}
 
    error = 0;
 	t = Halide::Tools::benchmark(trials,1,[&]() { 

@@ -1,18 +1,13 @@
 
-LLVM_ROOT ?= /Users/gilbo/code/llvm-install
-export PATH := $(LLVM_ROOT)/bin:$(PATH)
-
-LLVM_CONFIG := $(LLVM_ROOT)/bin/llvm-config
-CC := $(LLVM_ROOT)/bin/clang
-CXX := $(LLVM_ROOT)/bin/clang++
-
+CC := clang
+CXX := clang++
 
 LDFLAGS += $(shell $(LLVM_CONFIG) --ldflags)
 CFLAGS += $(shell $(LLVM_CONFIG) --cflags)
 CXXFLAGS += $(shell $(LLVM_CONFIG) --cxxflags)
 
 ifeq ($(OS),Windows_NT)
-  # nothing
+  echo windows
 else
   UNAME_S := $(shell uname -s)
   ifeq ($(UNAME_S),Darwin)
@@ -26,9 +21,9 @@ endif
 STEMS	:= $(wildcard blur*.cpp)
 LIBS := $(patsubst %.cpp,%.a, $(STEMS))
 GENS := $(patsubst %.cpp,%.gen, $(STEMS))
-HL_INSTALL := /Users/gilbo/code/Halide-coq-atl/install
+HL_INSTALL := /home/amangoliu/halide_build/distrib
 HL_INC := $(HL_INSTALL)/include
-HL_TOOLS := $(HL_INSTALL)/share/tools
+HL_TOOLS := $(HL_INSTALL)/tools
 HL_LIB := $(HL_INSTALL)/lib
 
 
@@ -38,7 +33,7 @@ ATL_OBJECTS := $(patsubst %.c,%.o, $(ATL_STEMS))
 
 run: atl run.cpp $(LIBS) 
 	$(CXX) run.cpp atl/libscheds.a $(LIBS) -g $(CXXFLAGS) $(LDFLAGS) \
-	      -std=c++17 -arch x86_64 \
+	      -std=c++17  \
 	      -fopenmp \
 	      -Wl,-rpath $(HL_LIB) \
 	      -I $(HL_INC) -I atl/ -I $(HL_TOOLS) \
@@ -47,7 +42,7 @@ run: atl run.cpp $(LIBS)
 
 profile: atl run.cpp $(LIBS) 
 	$(CXX) run.cpp atl/libscheds.a $(LIBS) -g $(CXXFLAGS) $(LDFLAGS) \
-	      -std=c++17 -arch x86_64 \
+	      -std=c++17  \
 	      -Wl,-rpath $(HL_LIB) \
 	      -I $(HL_INC) -I atl/ -I $(HL_TOOLS) \
 	      -L $(HL_LIB) -lHalide -lpthread -ldl \
@@ -58,7 +53,7 @@ profile: atl run.cpp $(LIBS)
 
 %.gen: %.cpp
 	$(CXX) $^ -g $(CXXFLAGS) \
-	      -std=c++17 -arch x86_64 \
+	      -std=c++17 \
 	      -Wl,-rpath $(HL_LIB) \
 	      -I $(HL_INC) \
 	      -L $(HL_LIB) -lHalide -lpthread -ldl \
@@ -74,7 +69,7 @@ atl/libscheds.a: $(ATL_OBJECTS)
 	ranlib $@
 
 atl/%.o: atl/%.c
-	$(CC) -g $(CFLAGS) -arch x86_64 -std=c11 -Wall \
+	$(CC) -g $(CFLAGS)  -std=c11 -Wall \
 	-fopenmp \
 	-ffast-math -O3 \
 	-c $^ -o $@
