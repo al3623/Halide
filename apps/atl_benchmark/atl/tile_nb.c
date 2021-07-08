@@ -2,20 +2,22 @@
 #include "tile_nb.h"
 
 void tile_nb(float* l,int m,int n,float*output){
-#pragma omp parallel for
+#pragma omp parallel 
+		{
+			float* tmp2 = (float*) calloc(1,(66) * (64) * sizeof (float));
+#pragma omp for
 	for (int H34 = 0; H34 < (((n - (1 + 0)) - (1)) / (64)); H34++) {
 		for (int H46 = 0; H46 < ((((m - (1 + 0)) - (1 + 0))) / (64)); H46++) {
-			float* tmp2 = (float*) calloc(1,(66) * (64) * sizeof (float));
 			for (int H49 = 0; H49 < 66; H49++) {
 				for (int H50 = 0; H50 < 64; H50++) {
 					float tmp3 = 0;
 					float tmp4 = 0;
 					tmp4 = l[(((m)) * ((H34) * (64) + H49)) + (H46) * (64) + H50];
 					float tmp5 = 0;
-					tmp5 = l[(((m)) * ((H34) * (64) + H49)) + 1 + (H46) * (64) + H50];
+					tmp5 = l[(((m)) * ((H34) * (64) + H49)) + (H46) * (64) + H50 + 1];
 					tmp3 = tmp4 + tmp5;
 					float tmp6 = 0;
-					tmp6 = l[(((m)) * ((H34) * (64) + H49)) + 2 + (H46) * (64) + H50];
+					tmp6 = l[(((m)) * ((H34) * (64) + H49)) + (H46) * (64) + H50 + 2];
 					tmp2[(64) * (H49) + H50] = tmp3 + tmp6;
 				}
 			}
@@ -24,16 +26,15 @@ void tile_nb(float* l,int m,int n,float*output){
 				for (int H53 = 0; H53 < 64; H53++) {
 					float tmp7 = 0;
 					float tmp8 = 0;
-					tmp8 = x4[(((64)) * (H53)) + H52];
+					tmp8 = x4[(((64)) * (H52)) + H53];
 					float tmp9 = 0;
-					tmp9 = x4[(((64)) * (H53 + 1)) + H52];
+					tmp9 = x4[(((64)) * (H52 + 1)) + H53];
 					tmp7 = tmp8 + tmp9;
 					float tmp10 = 0;
-					tmp10 = x4[(((64)) * (H53 + 2)) + H52];
-					output[(((m - (1 + 0)) - (1 + 0))) * ((64) * (H34) + H53) + (64) * (H46) + H52] = tmp7 + tmp10;
+					tmp10 = x4[(((64)) * (H52 + 2)) + H53];
+					output[(((m - (1 + 0)) - (1 + 0))) * ((64) * (H34) + H52) + (64) * (H46) + H53] = tmp7 + tmp10;
 				}
 			}
-			free(tmp2);
 		}
 		for (int H72 = ((((m - (1 + 0)) - (1 + 0))) / (64)); H72 < ((((m - (1 + 0)) - (1 + 0))) / (64)) + ((((((m - (1 + 0)) - (1 + 0))) % (64))) + (64) - 1 ) / (64); H72++) {
 			for (int H73 = 0; H73 < 64; H73++) {
@@ -79,6 +80,8 @@ void tile_nb(float* l,int m,int n,float*output){
 			}
 		}
 	}
+			free(tmp2);
+		}
 #pragma omp parallel for
 	for (int H75 = (((n - (1 + 0)) - (1)) / (64)); H75 < (((n - (1 + 0)) - (1)) / (64)) + (((((n - (1 + 0)) - (1)) % (64))) + (64) - 1 ) / (64); H75++) {
 		for (int H76 = 0; H76 < ((((m - (1 + 0)) - (1 + 0))) / (64)) + ((((((m - (1 + 0)) - (1 + 0))) % (64))) + (64) - 1 ) / (64); H76++) {

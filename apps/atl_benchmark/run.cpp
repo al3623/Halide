@@ -119,11 +119,11 @@ int main(int argc, char **argv) {
         printf("Halide\ttiled shift\t%d\t%d\t%g\n", N,M,double(bmk_res)*1000);
     }
     
-    //float *res1 = (float *) calloc(1,N*M* sizeof (float));
-    //bmk_res = Halide::Tools::benchmark([&]() { 
-    //    blurtiles(vf,M,N,res1);
-    //    });
-    //printf("ATL\ttiled guard\t%d\t%d\t%g\n",N,M,double(bmk_res)*1000);
+    float *res1 = (float *) calloc(1,N*M* sizeof (float));
+    bmk_res = Halide::Tools::benchmark([&]() { 
+        blurtiles(vf,M,N,res1);
+        });
+    printf("ATL\ttiled guard\t%d\t%d\t%g\n",N,M,double(bmk_res)*1000);
 
     float *res4 = (float *) calloc(1,N*M* sizeof (float));
     bmk_res = Halide::Tools::benchmark([&]() { 
