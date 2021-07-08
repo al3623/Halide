@@ -74,7 +74,7 @@ int main(int argc, char **argv) {
     bmk_res = Halide::Tools::benchmark([&]() { 
         blurpart(vf,M,N,res2);
         });
-    printf("ATL\timmediate\t%d\t%d\t%g\n",N,M,double(bmk_res*1000);
+    printf("ATL\timmediate\t%d\t%d\t%g\n",N,M,double(bmk_res)*1000);
  
 
 
@@ -133,7 +133,7 @@ int main(int argc, char **argv) {
 
 
    // Halide is equivalent
-    
+
     for (int y = 0; y < N; y++) {
         for (int x = 0; x < M; x++) {
             int i = y * M + x;
