@@ -27,168 +27,163 @@ extern "C" {
 // doesn't require libHalide.
 #include "HalideBuffer.h"
 #include "halide_benchmark.h"
+using Halide::Tools::benchmark;
+using Halide::Tools::BenchmarkResult;
 
 #include <stdio.h>
 
 int main(int argc, char **argv) {
-	int M = 2000;
-	int N = 2000;
-	int error = 0;
-	int trials = 30;
-	double t = 0; 
+    int M = 2000;
+    int N = 2000;
+    int error = 0;
+    int trials = 30;
+    int iters = 5;
+    double t = 0; 
 
-	Halide::Runtime::Buffer<float> input(M, N)
-			, output1(M, N)
-			, output2(M, N)
-			, output4(M, N)
-			, output3(M,N);
+    Halide::Runtime::Buffer<float> input(M, N)
+            , output1(M, N)
+            , output2(M, N)
+            , output4(M, N)
+            , output3(M,N);
 
-	halide_buffer_t ptrf = input.get_buf();
-	float *vf = (float *) ptrf.host;
+    halide_buffer_t ptrf = input.get_buf();
+    float *vf = (float *) ptrf.host;
 
-	for (int y = 0; y < N; y++) {
+    for (int y = 0; y < N; y++) {
         for (int x = 0; x < M; x++) {
-			input(x,y) = (float) (random() % 10);
+            input(x,y) = (float) (random() % 10);
         }
     }
+
+    BenchmarkResult bmk_res;
+  
  
-	error = 0;
-	t = Halide::Tools::benchmark(trials,1,[&]() { 
-    	error = immediate_float(input, output1);
-		});
+    error = 0;
+    bmk_res = Halide::Tools::benchmark([&]() { 
+        error = immediate_float(input, output1);
+        });
 
     if (error) {
         printf("Halide returned an error: %d\n", error);
         return -1;
     } else {
-		printf("Halide\timmediate\t%d\t%d\t%g\n",N,M,t*1000);
-	}
+        printf("Halide\timmediate\t%d\t%d\t%g\n",N,M,double(bmk_res)*1000);
+    }
 
- 	float *res2 = (float *) calloc(1,N*M* sizeof (float));
- 	t = Halide::Tools::benchmark(trials,1,[&]() { 
-    	blurpart(vf,M,N,res2);
-		});
-    printf("ATL\timmediate\t%d\t%d\t%g\n",N,M,t*1000);
+    float *res2 = (float *) calloc(1,N*M* sizeof (float));
+    bmk_res = Halide::Tools::benchmark([&]() { 
+        blurpart(vf,M,N,res2);
+        });
+    printf("ATL\timmediate\t%d\t%d\t%g\n",N,M,double(bmk_res)*1000);
  
 
-	error = 0;
-	t = Halide::Tools::benchmark(trials,1,[&]() { 
-    	error = two_stage_float(input, output3);
-		});
-	
-	if (error) {
-    	printf("Halide returned an error: %d\n", error);
-        return -1;
-    } else {
-		printf("Halide\ttwo_stage\t%d\t%d\t%g\n", N,M,t*1000);
-	}
 
-	float *res3 = (float *) calloc(1,N*M* sizeof (float));
-    t = Halide::Tools::benchmark(trials,1,[&]() { 
-    	blurtwopart(vf,M,N,res3);
-		});
-   	printf("ATL\ttwo stage\t%d\t%d\t%g\n",N,M,t*1000);
-
-	error = 0;
-	t = Halide::Tools::benchmark(trials,1,[&]() { 
-    	error = tiled_float_guard(input, output4);
-		});
-   if (error) {
+    error = 0;
+    bmk_res = Halide::Tools::benchmark([&]() { 
+        error = two_stage_float(input, output3);
+        });
+    
+    if (error) {
         printf("Halide returned an error: %d\n", error);
         return -1;
     } else {
-		printf("Halide\ttiled guard\t%d\t%d\t%g\n", N,M,t*1000);
-	}
+        printf("Halide\ttwo_stage\t%d\t%d\t%g\n", N,M,double(bmk_res)*1000);
+    }
 
-   error = 0;
-	t = Halide::Tools::benchmark(trials,1,[&]() { 
-    	error = tiled_float(input, output2);
-		});
-   if (error) {
+    float *res3 = (float *) calloc(1,N*M* sizeof (float));
+    bmk_res = Halide::Tools::benchmark([&]() { 
+        blurtwopart(vf,M,N,res3);
+        });
+    printf("ATL\ttwo stage\t%d\t%d\t%g\n",N,M,double(bmk_res)*1000);
+
+
+    error = 0;
+    bmk_res = Halide::Tools::benchmark([&]() { 
+        error = tiled_float_guard(input, output4);
+        });
+    if (error) {
         printf("Halide returned an error: %d\n", error);
         return -1;
     } else {
-		printf("Halide\ttiled shift\t%d\t%d\t%g\n", N,M,t*1000);
-	}
+        printf("Halide\ttiled guard\t%d\t%d\t%g\n", N,M,double(bmk_res)*1000);
+    }
 
-   /*
-   float *res1 = (float *) calloc(1,N*M* sizeof (float));
-   t = Halide::Tools::benchmark(trials,1,[&]() { 
-    	blurtiles(vf,M,N,res1);
-		});
-   printf("ATL\ttiled guard\t%d\t%d\t%g\n",N,M,t*1000);
-*/
+    error = 0;
+    bmk_res = Halide::Tools::benchmark([&]() { 
+        error = tiled_float(input, output2);
+        });
+    if (error) {
+        printf("Halide returned an error: %d\n", error);
+        return -1;
+    } else {
+        printf("Halide\ttiled shift\t%d\t%d\t%g\n", N,M,double(bmk_res)*1000);
+    }
+    
+    //float *res1 = (float *) calloc(1,N*M* sizeof (float));
+    //bmk_res = Halide::Tools::benchmark([&]() { 
+    //    blurtiles(vf,M,N,res1);
+    //    });
+    //printf("ATL\ttiled guard\t%d\t%d\t%g\n",N,M,double(bmk_res)*1000);
 
-   float *res4 = (float *) calloc(1,N*M* sizeof (float));
-   t = Halide::Tools::benchmark(trials,1,[&]() { 
-    	tile_nb(vf,M,N,res4);
-		});
-   printf("ATL\ttiled nb\t%d\t%d\t%g\n",N,M,t*1000);
+    float *res4 = (float *) calloc(1,N*M* sizeof (float));
+    bmk_res = Halide::Tools::benchmark([&]() { 
+        tile_nb(vf,M,N,res4);
+        });
+    printf("ATL\ttiled nb\t%d\t%d\t%g\n",N,M,double(bmk_res)*1000);
 
 
    // Halide is equivalent
-   for (int y = 0; y < N; y++) {
-        for (int x = 0; x < M; x++) {
-        }
-   }
- 
-   for (int y = 0; y < N; y++) {
-        for (int x = 0; x < M; x++) {
-			int i = y * M + x;
-			float out3f = res2[i];
-			float out6f = res3[i];
-        }
-   }
- 
-   for (int y = 0; y < N; y++) {
-		for (int x = 0; x < M; x++) {
-			int i = y * M + x;
-			//float atlout1 = res1[i];
-			float atlout2 = res2[i];
-			float atlout3 = res3[i];
-			float halideoutf = output1(x,y);
-			float halidetwof = output3(x,y);
-			float halidetilef = output2(x,y);
-			float halidetileshiftf = output4(x,y);
 
-			/*
-			if (atlout2 != atlout1) {
-				printf("Neq f\n");
-				goto out;
-			} */
+    for (int y = 0; y < N; y++) {
+        for (int x = 0; x < M; x++) {
+            int i = y * M + x;
+            //float atlout1 = res1[i];
+            float atlout2 = res2[i];
+            float atlout3 = res3[i];
+            float halideoutf = output1(x,y);
+            float halidetwof = output3(x,y);
+            float halidetilef = output2(x,y);
+            float halidetileshiftf = output4(x,y);
 
-			if (atlout2 != atlout3) {
-				printf("Neq f\n");
-				goto out;
-			}
-			if (halidetwof != halidetilef) {
-				printf("Neq f\n");
-				goto out;
-			}
-			if (halidetilef != halidetileshiftf) {
-					printf("Neq\n");
-					goto out;
-			}
-			if (halidetwof != halideoutf) {
-				printf("Neq f\n");
-				goto out;
-			}
-			if (atlout2 != halideoutf) {
-				printf("Neq f\n");
-				goto out;
-			}
-			if (atlout3 != halidetwof) {
-				printf("Neq f\n");
-				goto out;
-			}
-			/*
-			if (atlout1 != halidetilef) {
-				printf("Neq f\n");
-				goto out;
-			} */
-	
-       }
-   }
+            /*
+            if (atlout2 != atlout1) {
+                printf("Neq f\n");
+                goto out;
+            } */
+
+            if (atlout2 != atlout3) {
+                printf("Neq f\n");
+                goto out;
+            }
+            if (halidetwof != halidetilef) {
+                printf("Neq f\n");
+                goto out;
+            }
+            if (halidetilef != halidetileshiftf) {
+                    printf("Neq\n");
+                    goto out;
+            }
+            if (halidetwof != halideoutf) {
+                printf("Neq f\n");
+                goto out;
+            }
+            if (atlout2 != halideoutf) {
+                printf("Neq f\n");
+                goto out;
+            }
+            if (atlout3 != halidetwof) {
+                printf("Neq f\n");
+                goto out;
+            }
+            /*
+            if (atlout1 != halidetilef) {
+                printf("Neq f\n");
+                goto out;
+            } */
+    
+        }
+    }
+
 
 out:
 
