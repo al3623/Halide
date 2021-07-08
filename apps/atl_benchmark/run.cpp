@@ -18,6 +18,8 @@ extern "C" {
 #include "blurpart.h"
 #include "blurtwopart.h"
 #include "blurtiles.h"
+#include "tile_nb.h"
+#include "fusion_nb.h"
 }
 
 // We want to continue to use our Halide::Buffer with AOT-compiled
@@ -29,7 +31,7 @@ extern "C" {
 #include <stdio.h>
 
 int main(int argc, char **argv) {
-	int M = 2000;
+	int M = 3000;
 	int N = 2000;
 	int error = 0;
 	int trials = 30;
@@ -114,6 +116,13 @@ int main(int argc, char **argv) {
     	blurtiles(vf,M,N,res1);
 		});
    printf("ATL\ttiled guard\t%d\t%d\t%g\n",N,M,t*1000);
+
+   float *res4 = (float *) calloc(1,N*M* sizeof (float));
+   t = Halide::Tools::benchmark(trials,1,[&]() { 
+    	tile_nb(vf,M,N,res4);
+		});
+   printf("ATL\ttiled nb\t%d\t%d\t%g\n",N,M,t*1000);
+
 
    // Halide is equivalent
    for (int y = 0; y < N; y++) {

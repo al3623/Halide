@@ -17,7 +17,8 @@ int main(int argc, char **argv) {
 
 	blur_y.tile(x, y, xo, yo, xi, yi, 64, 64,TailStrategy::GuardWithIf);
     blur_x.compute_at(blur_y, xo);
-	
+
+	blur_y.parallel(yo);	
     blur_y.compile_to_static_library("blur_tiled_float_guard", {image}, "tiled_float_guard");
     blur_y.compile_to_c("blur_tiled_float_guard.c", {image}, "tiled_float_guard");
 	blur_y.print_loop_nest();
