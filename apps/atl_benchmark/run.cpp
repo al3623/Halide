@@ -31,7 +31,7 @@ extern "C" {
 #include <stdio.h>
 
 int main(int argc, char **argv) {
-	int M = 3000;
+	int M = 2000;
 	int N = 2000;
 	int error = 0;
 	int trials = 30;
@@ -111,11 +111,13 @@ int main(int argc, char **argv) {
 		printf("Halide\ttiled shift\t%d\t%d\t%g\n", N,M,t*1000);
 	}
 
+   /*
    float *res1 = (float *) calloc(1,N*M* sizeof (float));
    t = Halide::Tools::benchmark(trials,1,[&]() { 
     	blurtiles(vf,M,N,res1);
 		});
    printf("ATL\ttiled guard\t%d\t%d\t%g\n",N,M,t*1000);
+*/
 
    float *res4 = (float *) calloc(1,N*M* sizeof (float));
    t = Halide::Tools::benchmark(trials,1,[&]() { 
@@ -141,7 +143,7 @@ int main(int argc, char **argv) {
    for (int y = 0; y < N; y++) {
 		for (int x = 0; x < M; x++) {
 			int i = y * M + x;
-			float atlout1 = res1[i];
+			//float atlout1 = res1[i];
 			float atlout2 = res2[i];
 			float atlout3 = res3[i];
 			float halideoutf = output1(x,y);
@@ -149,10 +151,12 @@ int main(int argc, char **argv) {
 			float halidetilef = output2(x,y);
 			float halidetileshiftf = output4(x,y);
 
+			/*
 			if (atlout2 != atlout1) {
 				printf("Neq f\n");
 				goto out;
-			}
+			} */
+
 			if (atlout2 != atlout3) {
 				printf("Neq f\n");
 				goto out;
@@ -177,10 +181,11 @@ int main(int argc, char **argv) {
 				printf("Neq f\n");
 				goto out;
 			}
+			/*
 			if (atlout1 != halidetilef) {
 				printf("Neq f\n");
 				goto out;
-			}
+			} */
 	
        }
    }
