@@ -18,6 +18,8 @@ extern "C" {
 #include "blurpart.h"
 #include "blurtwopart.h"
 #include "blurtiles.h"
+#include "tile_nb.h"
+#include "fusion_nb.h"
 }
 
 // We want to continue to use our Halide::Buffer with AOT-compiled
@@ -35,7 +37,7 @@ int main(int argc, char **argv) {
     int N = 2000;
     int error = 0;
     int trials = 30;
-  int iters = 5;
+    int iters = 5;
     double t = 0; 
 
     Halide::Runtime::Buffer<float> input(M, N)
@@ -53,11 +55,11 @@ int main(int argc, char **argv) {
         }
     }
 
-  BenchmarkResult bmk_res;
+    BenchmarkResult bmk_res;
   
  
     error = 0;
-    t = Halide::Tools::benchmark(trials,iters,[&]() { 
+    bmk_res = Halide::Tools::benchmark([&]() { 
         error = immediate_float(input, output1);
         });
 
@@ -65,14 +67,14 @@ int main(int argc, char **argv) {
         printf("Halide returned an error: %d\n", error);
         return -1;
     } else {
-        printf("Halide\timmediate\t%d\t%d\t%g\n",N,M,t*1000);
+        printf("Halide\timmediate\t%d\t%d\t%g\n",N,M,double(bmk_res)*1000);
     }
 
     float *res2 = (float *) calloc(1,N*M* sizeof (float));
-    t = Halide::Tools::benchmark(trials,iters,[&]() { 
+    bmk_res = Halide::Tools::benchmark([&]() { 
         blurpart(vf,M,N,res2);
         });
-    printf("ATL\timmediate\t%d\t%d\t%g\n",N,M,t*1000);
+    printf("ATL\timmediate\t%d\t%d\t%g\n",N,M,double(bmk_res*1000);
  
 
 
@@ -116,19 +118,26 @@ int main(int argc, char **argv) {
     } else {
         printf("Halide\ttiled shift\t%d\t%d\t%g\n", N,M,double(bmk_res)*1000);
     }
+    
+    //float *res1 = (float *) calloc(1,N*M* sizeof (float));
+    //bmk_res = Halide::Tools::benchmark([&]() { 
+    //    blurtiles(vf,M,N,res1);
+    //    });
+    //printf("ATL\ttiled guard\t%d\t%d\t%g\n",N,M,double(bmk_res)*1000);
 
-    float *res1 = (float *) calloc(1,N*M* sizeof (float));
+    float *res4 = (float *) calloc(1,N*M* sizeof (float));
     bmk_res = Halide::Tools::benchmark([&]() { 
-        blurtiles(vf,M,N,res1);
+        tile_nb(vf,M,N,res4);
         });
-    printf("ATL\ttiled guard\t%d\t%d\t%g\n",N,M,double(bmk_res)*1000);
+    printf("ATL\ttiled nb\t%d\t%d\t%g\n",N,M,double(bmk_res)*1000);
+
 
    // Halide is equivalent
- 
-   for (int y = 0; y < N; y++) {
+    
+    for (int y = 0; y < N; y++) {
         for (int x = 0; x < M; x++) {
             int i = y * M + x;
-            float atlout1 = res1[i];
+            //float atlout1 = res1[i];
             float atlout2 = res2[i];
             float atlout3 = res3[i];
             float halideoutf = output1(x,y);
@@ -136,11 +145,13 @@ int main(int argc, char **argv) {
             float halidetilef = output2(x,y);
             float halidetileshiftf = output4(x,y);
 
+            /*
             if (atlout2 != atlout1) {
-              printf("Neq f\n");
-              goto out;
-            }
-            if (atlout1 != atlout3) {
+                printf("Neq f\n");
+                goto out;
+            } */
+
+            if (atlout2 != atlout3) {
                 printf("Neq f\n");
                 goto out;
             }
@@ -153,24 +164,25 @@ int main(int argc, char **argv) {
                     goto out;
             }
             if (halidetwof != halideoutf) {
-              printf("Neq f\n");
-              goto out;
+                printf("Neq f\n");
+                goto out;
             }
-            if (atlout1 != halideoutf) {
-              printf("Neq f\n");
-              goto out;
+            if (atlout2 != halideoutf) {
+                printf("Neq f\n");
+                goto out;
             }
             if (atlout3 != halidetwof) {
                 printf("Neq f\n");
                 goto out;
             }
+            /*
             if (atlout1 != halidetilef) {
                 printf("Neq f\n");
                 goto out;
-            }
+            } */
     
-       }
-   }
+        }
+    }
 
 
 out:
