@@ -2,6 +2,7 @@
 #include "blurtiles.h"
 
 void blurtiles(float* l,int m,int n,float*output){
+#pragma omp parallel for
 	for (int H80 = 0; H80 < 1; H80++) {
 		for (int H81 = 0; H81 < m; H81++) {
 			float tmp2 = 0;
@@ -53,6 +54,7 @@ void blurtiles(float* l,int m,int n,float*output){
 			output[(m) * (H80) + H81] = tmp2 + tmp13;
 		}
 	}
+#pragma omp parallel for
 	for (int H128 = 1; H128 < (n - (1 + 0)); H128++) {
 		for (int H129 = 0; H129 < 1; H129++) {
 			float tmp18 = 0;
@@ -124,7 +126,7 @@ void blurtiles(float* l,int m,int n,float*output){
 					tmp39 = tmp40 + tmp41;
 					float tmp42 = 0;
 					tmp42 = x10[(((64)) * (H168 + 2)) + H169];
-					output[ H150*64*m + H162*64 + (H168+1)*m + H169 + 1 ] = tmp39 + tmp42;
+					output[(((1 + ((m - (1 + 0)) - (1 + 0))) + (m - (m - (1))))) * (((H150) * (64) + H168 + 1)) + ((H162) * (64) + H169 + 1)] = tmp39 + tmp42;
 				}
 			}
 			free(tmp34);
@@ -166,14 +168,14 @@ void blurtiles(float* l,int m,int n,float*output){
 							float tmp58 = 0;
 							tmp58 = l[(((m)) * ((H150) * (64) + H190 + 1 + 1)) + (H188) * (64) + H189 + 1 + 1];
 							tmp54 = tmp55 + tmp58;
-							output[ H150*64*m + H188*64 + (H189 +1)*m + H190+1 ] = tmp43 + tmp54;
-							//output[(((1 + ((m - (1 + 0)) - (1 + 0))) + (m - (m - (1)))) * 64) * ((64) * ((H150 + 1)) + H190) + (64) * ((((H188 - (((((m - (1 + 0)) - (1 + 0))) / (64)))) + ((((m - (1 + 0)) - (1 + 0))) / (64))) + 1)) + H189] = tmp43 + tmp54;
+							output[(((1 + ((m - (1 + 0)) - (1 + 0))) + (m - (m - (1))))) * (((H150) * (64) + H190 + 1)) + ((((H188 - (((((m - (1 + 0)) - (1 + 0))) / (64)))) + ((((m - (1 + 0)) - (1 + 0))) / (64)))) * (64) + H189 + 1)] = tmp43 + tmp54;
 						}
 					}
 				}
 			}
 		}
 	}
+#pragma omp parallel for
 	for (int H191 = (((n - (1 + 0)) - (1)) / (64)); H191 < (((n - (1 + 0)) - (1)) / (64)) + (((((n - (1 + 0)) - (1)) % (64))) + (64) - 1 ) / (64); H191++) {
 		for (int H192 = 0; H192 < ((((m - (1 + 0)) - (1 + 0))) / (64)) + ((((((m - (1 + 0)) - (1 + 0))) % (64))) + (64) - 1 ) / (64); H192++) {
 			for (int H193 = 0; H193 < 64; H193++) {
@@ -212,14 +214,14 @@ void blurtiles(float* l,int m,int n,float*output){
 							float tmp74 = 0;
 							tmp74 = l[(((m)) * ((H191) * (64) + H194 + 1 + 1)) + (H192) * (64) + H193 + 1 + 1];
 							tmp70 = tmp71 + tmp74;
-							output[ H191*64*m + H192*64 + (H194+1)*m + H193+1 ] = tmp59 + tmp70;
-							//output[(((1 + ((m - (1 + 0)) - (1 + 0))) + (m - (m - (1)))) * 64) * ((64) * ((((H191 - ((((n - (1 + 0)) - (1)) / (64)))) + (((n - (1 + 0)) - (1)) / (64))) + 1)) + H194) + (64) * ((H192 + 1)) + H193] = tmp59 + tmp70;
+							output[(((1 + ((m - (1 + 0)) - (1 + 0))) + (m - (m - (1))))) * (((((H191 - ((((n - (1 + 0)) - (1)) / (64)))) + (((n - (1 + 0)) - (1)) / (64)))) * (64) + H194 + 1)) + ((H192) * (64) + H193 + 1)] = tmp59 + tmp70;
 						}
 					}
 				}
 			}
 		}
 	}
+#pragma omp parallel for
 	for (int H195 = 1; H195 < (n - (1 + 0)); H195++) {
 		for (int H196 = m - (1); H196 < m; H196++) {
 			float tmp75 = 0;
@@ -263,6 +265,7 @@ void blurtiles(float* l,int m,int n,float*output){
 			output[(((1 + ((m - (1 + 0)) - (1 + 0))) + (m - (m - (1))))) * (((H195 - (1)) + 1)) + ((H196 - (m - (1))) + (1 + ((m - (1 + 0)) - (1 + 0))))] = tmp75 + tmp90;
 		}
 	}
+#pragma omp parallel for
 	for (int H197 = n - (1); H197 < n; H197++) {
 		for (int H198 = 0; H198 < m; H198++) {
 			float tmp91 = 0;
